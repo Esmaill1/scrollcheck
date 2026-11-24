@@ -1,3 +1,5 @@
+import { useAnimatedNumber } from "./useAnimatedNumber.js";
+
 export default function DayRing({ usageHours, sleepHours, semesterImpact }) {
   const total = 24;
   const scrollFrac = Math.min(0.65, Math.max(0.02, usageHours / total));
@@ -20,6 +22,10 @@ export default function DayRing({ usageHours, sleepHours, semesterImpact }) {
   const semDebt = semesterImpact
     ? semesterImpact.semester_sleep_debt_hours
     : Math.round(Math.max(0, 8 - sleepHours) * 112);
+
+  const displayDays = useAnimatedNumber(daysYear, 320);
+  const displaySemScroll = Math.round(useAnimatedNumber(semScroll, 320));
+  const displaySemDebt = Math.round(useAnimatedNumber(semDebt, 320));
 
   return (
     <div className="day-ring-widget">
@@ -78,7 +84,7 @@ export default function DayRing({ usageHours, sleepHours, semesterImpact }) {
             fill="var(--ink-primary)"
             fontFamily="Cairo, sans-serif"
           >
-            {daysYear} يوم
+            {displayDays.toFixed(1)} يوم
           </text>
           <text
             x="60"
@@ -101,7 +107,7 @@ export default function DayRing({ usageHours, sleepHours, semesterImpact }) {
       </div>
 
       <p className="ring-semester-line">
-        {semScroll} س سكرول · {semDebt} س نقص نوم في الترم
+        {displaySemScroll} س سكرول · {displaySemDebt} س نقص نوم في الترم
       </p>
     </div>
   );

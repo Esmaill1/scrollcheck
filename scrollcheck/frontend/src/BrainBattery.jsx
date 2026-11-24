@@ -1,5 +1,28 @@
-export default function BrainBattery({ score, persona }) {
+import { useEffect, useId, useRef, useState } from "react";
+import { useAnimatedNumber } from "./useAnimatedNumber.js";
+
+export default function BrainBattery({ score, persona, interactive = false, onTap }) {
+  const clipId = useId();
   const pct = Math.round(Math.max(10, Math.min(100, (score / 10) * 100)));
+  const displayPct = Math.round(useAnimatedNumber(pct, 360));
+
+  const prevPctRef = useRef(pct);
+  const [pulseState, setPulseState] = useState(null);
+
+  useEffect(() => {
+    const prev = prevPctRef.current;
+    prevPctRef.current = pct;
+    if (pct === prev) return undefined;
+
+    const nextPulse = pct > prev ? "charging" : "draining";
+    setPulseState(nextPulse);
+    const ms = nextPulse === "charging" ? 620 : 320;
+    const timer = setTimeout(() => setPulseState(null), ms);
+    return () => clearTimeout(timer);
+  }, [pct]);
+
+  const moodSlug =
+    persona === "Balanced" ? "balanced" : persona === "Moderate Risk" ? "moderate" : "burnout";
 
   const tone =
     persona === "Balanced"
@@ -10,16 +33,22 @@ export default function BrainBattery({ score, persona }) {
 
   const fillHeight = Math.max(14, (pct / 100) * 84);
   const fillY = 108 - fillHeight;
+  const showBubbles = pulseState === "charging" || persona === "Balanced";
 
-  return (
-    <div
-      className="battery-widget"
-      style={{ "--battery-glow": tone.glow }}
-      aria-label={`شحن طاقتك الذهنية ${pct}%`}
-    >
+  const widgetClass = [
+    "battery-widget",
+    `mood-${moodSlug}`,
+    pulseState ? `is-${pulseState}` : "",
+    interactive ? "is-interactive" : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
+
+  const content = (
+    <>
       <svg viewBox="0 0 110 128" className="battery-svg">
         <defs>
-          <clipPath id="battery-inner-clip">
+          <clipPath id={clipId}>
             <rect x="19" y="22" width="72" height="88" rx="14" />
           </clipPath>
         </defs>
@@ -37,7 +66,7 @@ export default function BrainBattery({ score, persona }) {
           strokeWidth="2.5"
         />
 
-        <g clipPath="url(#battery-inner-clip)">
+        <g clipPath={`url(#${clipId})`}>
           <rect
             x="19"
             y={fillY}
@@ -52,9 +81,16 @@ export default function BrainBattery({ score, persona }) {
             width="72"
             height="4"
             fill="#FFFFFF"
-            fillOpacity="0.3"
+            fillOpacity="0.35"
             className="battery-liquid"
           />
+          {showBubbles && (
+            <g fill="#FFFFFF" fillOpacity="0.45">
+              <circle cx="34" cy="94" r="2.2" className="battery-bubble b1" />
+              <circle cx="56" cy="99" r="2.8" className="battery-bubble b2" />
+              <circle cx="76" cy="92" r="2" className="battery-bubble b3" />
+            </g>
+          )}
         </g>
 
         {persona === "Balanced" && (
@@ -62,8 +98,15 @@ export default function BrainBattery({ score, persona }) {
             <path d="M 37 58 Q 41 52 45 58" />
             <path d="M 65 58 Q 69 52 73 58" />
             <path d="M 44 71 Q 55 81 66 71" />
-            <circle cx="82" cy="34" r="2.4" fill="#FFFFFF" stroke="none" />
-            <circle cx="29" cy="39" r="1.7" fill="#FFFFFF" stroke="none" />
+            <circle cx="82" cy="34" r="2.4" fill="#FFFFFF" stroke="none" className="sparkle-dot" />
+            <circle
+              cx="29"
+              cy="39"
+              r="1.7"
+              fill="#FFFFFF"
+              stroke="none"
+              className="sparkle-dot d2"
+            />
           </g>
         )}
 
@@ -84,16 +127,50 @@ export default function BrainBattery({ score, persona }) {
               d="M 81 37 C 81 37 85 43 85 46 A 4 4 0 1 1 77 46 C 77 43 81 37 81 37 Z"
               fill="#93C5FD"
               stroke="none"
+              className="sweat-drop"
             />
           </g>
+        )}
+
+        {pulseState === "charging" && (
+          <path
+            d="M 57 31 L 47 47 L 54 47 L 52 59 L 63 42 L 56 42 Z"
+            fill="#FFFFFF"
+            fillOpacity="0.92"
+            className="battery-bolt"
+          />
         )}
       </svg>
       <div className="battery-caption">
         <span className="tabular-readout battery-pct" style={{ color: tone.fill }}>
-          {pct}%
+          {displayPct}%
         </span>
         <span className="battery-status">{tone.label}</span>
       </div>
+    </>
+  );
+
+  if (interactive) {
+    return (
+      <button
+        type="button"
+        className={widgetClass}
+        style={{ "--battery-glow": tone.glow }}
+        aria-label={`شحن طاقتك الذهنية ${displayPct}% — اضغط للتجربة`}
+        onClick={onTap}
+      >
+        {content}
+      </button>
+    );
+  }
+
+  return (
+    <div
+      className={widgetClass}
+      style={{ "--battery-glow": tone.glow }}
+      aria-label={`شحن طاقتك الذهنية ${displayPct}%`}
+    >
+      {content}
     </div>
   );
 }

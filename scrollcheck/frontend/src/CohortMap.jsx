@@ -222,6 +222,7 @@ export default function CohortMap({
                 strokeWidth="1.3"
                 strokeDasharray="3 3"
                 strokeOpacity="0.8"
+                className="twin-tether-line"
               />
               <circle
                 cx={twinPx.px}
@@ -245,6 +246,7 @@ export default function CohortMap({
                 strokeWidth="2"
                 strokeDasharray="4 4"
                 markerEnd="url(#trajectory-arrow)"
+                className="trajectory-line"
               />
               <circle
                 cx={basePx.px}
@@ -337,7 +339,7 @@ export default function CohortMap({
 
       {nearestTwin && (
         <div className="twin-line">
-          <span className="twin-pill">
+          <span key={nearestTwin.id} className="twin-pill">
             تشابه <span className="tabular-readout">{nearestTwin.similarity_pct}%</span>
           </span>
           <p>

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import BrandLogo from "./BrandLogo.jsx";
 import AppIcon from "./AppIcon.jsx";
 
@@ -42,8 +42,12 @@ const STUDY_STAGES = [
 
 const TOTAL_STEPS = 5;
 
-export default function QuestionFlow({ initialValues, onExit, onComplete }) {
+export default function QuestionFlow({ initialValues, onExit, onComplete, onBurst }) {
   const [step, setStep] = useState(0);
+  const [stepDir, setStepDir] = useState("forward");
+  const [justPicked, setJustPicked] = useState(null);
+  const advanceTimerRef = useRef(null);
+
   const [answers, setAnswers] = useState({
     age: initialValues?.age ?? 20,
     daily_usage_hours: initialValues?.daily_usage_hours ?? 5.5,
@@ -55,12 +59,44 @@ export default function QuestionFlow({ initialValues, onExit, onComplete }) {
     relationship_status: initialValues?.relationship_status ?? "Single",
   });
 
+  useEffect(() => {
+    return () => {
+      if (advanceTimerRef.current) clearTimeout(advanceTimerRef.current);
+    };
+  }, []);
+
   const update = (key, val) => {
     setAnswers((prev) => ({ ...prev, [key]: val }));
   };
 
+  const goToStep = (nextStep) => {
+    if (advanceTimerRef.current) {
+      clearTimeout(advanceTimerRef.current);
+      advanceTimerRef.current = null;
+    }
+    setStepDir(nextStep >= step ? "forward" : "back");
+    setJustPicked(null);
+    setStep(nextStep);
+  };
+
+  const pickAndAdvance = (key, val, nextStep, e) => {
+    update(key, val);
+    setJustPicked(`${key}:${val}`);
+    if (e?.clientX && e?.clientY) {
+      onBurst?.({ kind: "spark", x: e.clientX, y: e.clientY });
+    }
+    if (advanceTimerRef.current) clearTimeout(advanceTimerRef.current);
+    advanceTimerRef.current = setTimeout(() => {
+      setStepDir("forward");
+      setJustPicked(null);
+      setStep(nextStep);
+    }, 160);
+  };
+
   const progress = ((step + 1) / TOTAL_STEPS) * 100;
   const daysPerYear = ((answers.daily_usage_hours * 365) / 24).toFixed(1);
+  const usagePct = ((answers.daily_usage_hours - 1.5) / (9.0 - 1.5)) * 100;
+  const sleepPct = ((answers.sleep_hours - 4.0) / (9.5 - 4.0)) * 100;
 
   return (
     <div className="app-shell question-shell" data-theme="moderate">
@@ -73,7 +109,7 @@ export default function QuestionFlow({ initialValues, onExit, onComplete }) {
           <BrandLogo size="sm" />
         </button>
 
-        <span className="q-counter">
+        <span key={step} className="q-counter">
           سؤال {step + 1} من {TOTAL_STEPS}
         </span>
 
@@ -83,30 +119,33 @@ export default function QuestionFlow({ initialValues, onExit, onComplete }) {
       </header>
 
       <main className="question-stage">
-        <div className="q-open-container" key={step}>
+        <div className={`q-open-container dir-${stepDir}`} key={step}>
           {step === 0 && (
             <div className="q-step-body">
               <h1 className="q-title">أكتر أبلكيشن بياكل وقتك إيه؟</h1>
               <p className="q-subtitle">اختار الأبلكيشن اللي بتفتحه أكتر حاجة.</p>
 
               <div className="q-tile-grid">
-                {PLATFORMS.map((p) => (
-                  <button
-                    key={p.id}
-                    type="button"
-                    className={`q-tile q-tile-app ${answers.platform === p.id ? "is-selected" : ""}`}
-                    onClick={() => {
-                      update("platform", p.id);
-                      setStep(1);
-                    }}
-                  >
-                    <AppIcon name={p.id} size={34} />
-                    <div className="q-tile-text">
-                      <strong>{p.id}</strong>
-                      <span>{p.sub}</span>
-                    </div>
-                  </button>
-                ))}
+                {PLATFORMS.map((p) => {
+                  const selected = answers.platform === p.id;
+                  const picking = justPicked === `platform:${p.id}`;
+                  return (
+                    <button
+                      key={p.id}
+                      type="button"
+                      className={`q-tile q-tile-app ${selected ? "is-selected" : ""} ${
+                        picking ? "is-just-picked" : ""
+                      }`}
+                      onClick={(e) => pickAndAdvance("platform", p.id, 1, e)}
+                    >
+                      <AppIcon name={p.id} size={34} />
+                      <div className="q-tile-text">
+                        <strong>{p.id}</strong>
+                        <span>{p.sub}</span>
+                      </div>
+                    </button>
+                  );
+                })}
               </div>
             </div>
           )}
@@ -132,6 +171,7 @@ export default function QuestionFlow({ initialValues, onExit, onComplete }) {
                   max="9.0"
                   step="0.1"
                   aria-label="ساعات السكرول اليومية"
+                  style={{ "--slider-pct": `${usagePct.toFixed(1)}%` }}
                   value={answers.daily_usage_hours}
                   onChange={(e) => update("daily_usage_hours", parseFloat(e.target.value))}
                 />
@@ -150,7 +190,12 @@ export default function QuestionFlow({ initialValues, onExit, onComplete }) {
                     className={`q-quick-btn ${
                       Math.abs(answers.daily_usage_hours - tier.value) < 0.15 ? "is-selected" : ""
                     }`}
-                    onClick={() => update("daily_usage_hours", tier.value)}
+                    onClick={(e) => {
+                      update("daily_usage_hours", tier.value);
+                      if (e.clientX && e.clientY) {
+                        onBurst?.({ kind: "spark", x: e.clientX, y: e.clientY });
+                      }
+                    }}
                   >
                     {tier.label}
                   </button>
@@ -158,10 +203,10 @@ export default function QuestionFlow({ initialValues, onExit, onComplete }) {
               </div>
 
               <div className="q-nav-row">
-                <button type="button" className="btn-ghost-sm" onClick={() => setStep(0)}>
+                <button type="button" className="btn-ghost-sm" onClick={() => goToStep(0)}>
                   رجوع
                 </button>
-                <button type="button" className="btn-primary" onClick={() => setStep(2)}>
+                <button type="button" className="btn-primary btn-dopamine" onClick={() => goToStep(2)}>
                   اللي بعده
                 </button>
               </div>
@@ -193,6 +238,7 @@ export default function QuestionFlow({ initialValues, onExit, onComplete }) {
                   max="9.5"
                   step="0.1"
                   aria-label="ساعات النوم"
+                  style={{ "--slider-pct": `${sleepPct.toFixed(1)}%` }}
                   value={answers.sleep_hours}
                   onChange={(e) => update("sleep_hours", parseFloat(e.target.value))}
                 />
@@ -211,7 +257,12 @@ export default function QuestionFlow({ initialValues, onExit, onComplete }) {
                     className={`q-quick-btn ${
                       Math.abs(answers.sleep_hours - tier.value) < 0.15 ? "is-selected" : ""
                     }`}
-                    onClick={() => update("sleep_hours", tier.value)}
+                    onClick={(e) => {
+                      update("sleep_hours", tier.value);
+                      if (e.clientX && e.clientY) {
+                        onBurst?.({ kind: "spark", x: e.clientX, y: e.clientY });
+                      }
+                    }}
                   >
                     {tier.label}
                   </button>
@@ -219,10 +270,10 @@ export default function QuestionFlow({ initialValues, onExit, onComplete }) {
               </div>
 
               <div className="q-nav-row">
-                <button type="button" className="btn-ghost-sm" onClick={() => setStep(1)}>
+                <button type="button" className="btn-ghost-sm" onClick={() => goToStep(1)}>
                   رجوع
                 </button>
-                <button type="button" className="btn-primary" onClick={() => setStep(3)}>
+                <button type="button" className="btn-primary btn-dopamine" onClick={() => goToStep(3)}>
                   اللي بعده
                 </button>
               </div>
@@ -235,24 +286,27 @@ export default function QuestionFlow({ initialValues, onExit, onComplete }) {
               <p className="q-subtitle">التوتر بسبب السوشيال ليه علاقة مباشرة بهبوط الدرجات.</p>
 
               <div className="q-stack-options">
-                {TENSION_OPTIONS.map((opt) => (
-                  <button
-                    key={opt.value}
-                    type="button"
-                    className={`q-tile ${answers.conflicts === opt.value ? "is-selected" : ""}`}
-                    onClick={() => {
-                      update("conflicts", opt.value);
-                      setStep(4);
-                    }}
-                  >
-                    <strong>{opt.title}</strong>
-                    <span>{opt.sub}</span>
-                  </button>
-                ))}
+                {TENSION_OPTIONS.map((opt) => {
+                  const selected = answers.conflicts === opt.value;
+                  const picking = justPicked === `conflicts:${opt.value}`;
+                  return (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      className={`q-tile ${selected ? "is-selected" : ""} ${
+                        picking ? "is-just-picked" : ""
+                      }`}
+                      onClick={(e) => pickAndAdvance("conflicts", opt.value, 4, e)}
+                    >
+                      <strong>{opt.title}</strong>
+                      <span>{opt.sub}</span>
+                    </button>
+                  );
+                })}
               </div>
 
               <div className="q-nav-row">
-                <button type="button" className="btn-ghost-sm" onClick={() => setStep(2)}>
+                <button type="button" className="btn-ghost-sm" onClick={() => goToStep(2)}>
                   رجوع
                 </button>
               </div>
@@ -270,7 +324,12 @@ export default function QuestionFlow({ initialValues, onExit, onComplete }) {
                     key={st.value}
                     type="button"
                     className={`q-tile ${answers.academic_level === st.value ? "is-selected" : ""}`}
-                    onClick={() => update("academic_level", st.value)}
+                    onClick={(e) => {
+                      update("academic_level", st.value);
+                      if (e.clientX && e.clientY) {
+                        onBurst?.({ kind: "spark", x: e.clientX, y: e.clientY });
+                      }
+                    }}
                   >
                     <strong>{st.label}</strong>
                     <span>{st.sub}</span>
@@ -313,10 +372,19 @@ export default function QuestionFlow({ initialValues, onExit, onComplete }) {
               </div>
 
               <div className="q-nav-row">
-                <button type="button" className="btn-ghost-sm" onClick={() => setStep(3)}>
+                <button type="button" className="btn-ghost-sm" onClick={() => goToStep(3)}>
                   رجوع
                 </button>
-                <button type="button" className="btn-primary" onClick={() => onComplete(answers)}>
+                <button
+                  type="button"
+                  className="btn-primary btn-dopamine"
+                  onClick={(e) => {
+                    if (e.clientX && e.clientY) {
+                      onBurst?.({ kind: "spark", x: e.clientX, y: e.clientY });
+                    }
+                    onComplete(answers);
+                  }}
+                >
                   وريني النتيجة
                 </button>
               </div>
