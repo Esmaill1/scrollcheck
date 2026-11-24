@@ -234,36 +234,36 @@ def _build_archetype(persona: str, usage: float, sleep: float, conflicts: int) -
     if persona == "High Burnout Risk":
         if sleep < 6.0:
             return {
-                "title": "The 2 AM Doomscroller",
-                "tagline": "Your feed is eating your REM cycle — and tomorrow's focus.",
+                "title": "سهران الساعة 2 على السكرول",
+                "tagline": "الموبايل واكل نومك، وتاني يوم بتصحى مش قادر تركز.",
                 "theme": "burnout",
             }
         if conflicts >= 4:
             return {
-                "title": "The Notification Magnet",
-                "tagline": "Constant online tension plus heavy scrolling is draining your battery.",
+                "title": "مغناطيس نوتيفيكيشنز وخناقات",
+                "tagline": "الشد والتوتر على السوشيال مع السكرول الكتير مخلصين بطاريتك.",
                 "theme": "burnout",
             }
         return {
-            "title": "The Endless Feed Rider",
-            "tagline": "High daily screen time has pushed your routine into the red zone.",
+            "title": "غرقان في السكرول",
+            "tagline": "ساعات الشاشة العالية دخلت يومك في المنطقة الحمرا.",
             "theme": "burnout",
         }
     if persona == "Moderate Risk":
         return {
-            "title": "The Overcaffeinated Crammer",
-            "tagline": "Running on borderline sleep and mid-day scrolls — one good week flips this.",
+            "title": "عايش على القهوة والزق",
+            "tagline": "نومك على الحركرك وسكرول نص اليوم بيسحبك. أسبوع واحد مظبوط يفرق معاك.",
             "theme": "moderate",
         }
     if sleep >= 7.5 and usage <= 3.5:
         return {
-            "title": "The Rested Main Character",
-            "tagline": "Protected sleep and controlled screen time keep your brain sharp.",
+            "title": "رايق وماسك يومك",
+            "tagline": "نومك مظبوط والموبايل تحت السيطرة. دماغك فايقة للمذاكرة.",
             "theme": "balanced",
         }
     return {
-        "title": "The Steady Navigator",
-        "tagline": "Healthy balance overall — keep guarding your sleep window.",
+        "title": "ماشي في السليم",
+        "tagline": "روتينك متوازن كويس. حافظ بس على ميعاد نومك.",
         "theme": "balanced",
     }
 
@@ -309,16 +309,16 @@ def _find_minimum_fix(req: SimulateRequest, current: dict) -> Optional[dict]:
     t_u, t_s, t_c, proj = best_candidate
     changes: List[str] = []
     if t_u < req.daily_usage_hours - 0.05:
-        changes.append(f"trim daily screen time to {t_u:.1f}h (-{req.daily_usage_hours - t_u:.1f}h)")
+        changes.append(f"تقلل الموبايل لـ {t_u:.1f} ساعة (-{req.daily_usage_hours - t_u:.1f} س)")
     if t_s > req.sleep_hours + 0.05:
-        changes.append(f"sleep {t_s:.1f}h/night (+{t_s - req.sleep_hours:.1f}h)")
+        changes.append(f"تنام {t_s:.1f} ساعة في الليل (+{t_s - req.sleep_hours:.1f} س)")
     if t_c < req.conflicts:
-        changes.append(f"reduce social-media tension to {t_c}")
+        changes.append(f"تقلل التوتر بسبب السوشيال لـ {t_c}")
 
     summary = (
-        "Smallest shift to reach the Balanced group: " + ", ".join(changes) + "."
+        "أقل تعديل يدخلك في منطقة التوازن: " + "، و".join(changes) + "."
         if changes
-        else "Minor adjustments stabilize your routine into the Balanced group."
+        else "تعديلات بسيطة هتثبّت روتينك في منطقة التوازن."
     )
 
     return {
@@ -396,20 +396,20 @@ def simulate(req: SimulateRequest):
     triggered_rules = [
         {
             "id": "screen_and_sleep",
-            "title": "Over 5.5h screen time paired with under 6.5h sleep",
-            "evidence": "2.73x higher chance of low mental well-being (78% in cohort)",
+            "title": "أكتر من 5.5 ساعات موبايل مع نوم أقل من 6.5 ساعات",
+            "evidence": "احتمال نزول النفسية بيزيد 2.73 ضعف (حصل مع 78% من الطلبة دول)",
             "status": "active" if (req.daily_usage_hours > 5.5 and req.sleep_hours < 6.5) else "cleared",
         },
         {
             "id": "high_conflicts",
-            "title": "Three or more social-media arguments or tension points",
-            "evidence": "1.56x academic impact lift (strongly linked to grade drops)",
+            "title": "توتر أو خناقات بسبب السوشيال (3 من 5 أو أكتر)",
+            "evidence": "تأثير مباشر على الدرجات بنسبة 1.56 ضعف",
             "status": "active" if req.conflicts >= 3 else "cleared",
         },
         {
             "id": "heavy_scrolling",
-            "title": "Daily social media use above 5.5 hours",
-            "evidence": "2.30x higher rate of low mental well-being",
+            "title": "قعدة على السوشيال أكتر من 5.5 ساعات في اليوم",
+            "evidence": "احتمال الإرهاق النفسي بيزيد 2.30 ضعف",
             "status": "active" if req.daily_usage_hours > 5.5 else "cleared",
         },
     ]

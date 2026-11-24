@@ -2,41 +2,41 @@ import { useState } from "react";
 import BrandLogo from "./BrandLogo.jsx";
 
 const PLATFORMS = [
-  { id: "TikTok", sub: "Short-form loops" },
-  { id: "Instagram", sub: "Reels & DMs" },
-  { id: "YouTube", sub: "Videos & Shorts" },
-  { id: "Snapchat", sub: "Snaps & streaks" },
-  { id: "WhatsApp", sub: "Group chats" },
-  { id: "Facebook", sub: "Feeds & groups" },
-  { id: "Twitter", sub: "Scrolling threads" },
-  { id: "LinkedIn", sub: "Career feeds" },
+  { id: "TikTok", sub: "فيديوهات بتسحب بعض" },
+  { id: "Instagram", sub: "ريلز ورسايل" },
+  { id: "YouTube", sub: "فيديوهات وشورتس" },
+  { id: "Snapchat", sub: "ستريكات وستوريز" },
+  { id: "WhatsApp", sub: "جروبات وشات" },
+  { id: "Facebook", sub: "بوستات وتقليب" },
+  { id: "Twitter", sub: "ثريدز وتريندات" },
+  { id: "LinkedIn", sub: "شغل وبوستات" },
 ];
 
 const USAGE_TIERS = [
-  { label: "2.5h Light", value: 2.5 },
-  { label: "4.5h Average", value: 4.5 },
-  { label: "6.5h Heavy", value: 6.5 },
-  { label: "8.0h Marathon", value: 8.0 },
+  { label: "2.5 س خفيف", value: 2.5 },
+  { label: "4.5 س عادي", value: 4.5 },
+  { label: "6.5 س كتير", value: 6.5 },
+  { label: "8.0 س مابتسيبوش", value: 8.0 },
 ];
 
 const SLEEP_TIERS = [
-  { label: "5.0h Exhausted", value: 5.0 },
-  { label: "6.0h Short", value: 6.0 },
-  { label: "7.0h Decent", value: 7.0 },
-  { label: "8.0h Rested", value: 8.0 },
+  { label: "5.0 س مسحول", value: 5.0 },
+  { label: "6.0 س قليل", value: 6.0 },
+  { label: "7.0 س معقول", value: 7.0 },
+  { label: "8.0 س شبعان نوم", value: 8.0 },
 ];
 
 const TENSION_OPTIONS = [
-  { value: 0, title: "0 — Never", sub: "Zero drama or stress from my phone" },
-  { value: 1, title: "1 — Rarely", sub: "Once in a while, mostly harmless" },
-  { value: 3, title: "3 — Weekly tension", sub: "Causes FOMO, distraction, or arguments" },
-  { value: 4, title: "4 — Almost daily", sub: "Constantly pulls me away from sleep or study" },
+  { value: 0, title: "0 — ولا مرة", sub: "الموبايل مش عامل أي قلق أو شد في يومي" },
+  { value: 1, title: "1 — نادرًا", sub: "حاجة بسيطة بتعدي من غير تأثير" },
+  { value: 3, title: "3 — كل أسبوع", sub: "بيعملي توتر أو تشتيت أو خناقات أحيانًا" },
+  { value: 4, title: "4 — تقريبًا كل يوم", sub: "ساحبني من النوم والمذاكرة طول الوقت" },
 ];
 
 const STUDY_STAGES = [
-  { value: "High School", sub: "Ages 16–18" },
-  { value: "Undergraduate", sub: "College / University" },
-  { value: "Graduate", sub: "Master's / PhD" },
+  { value: "High School", label: "ثانوي", sub: "16 – 18 سنة" },
+  { value: "Undergraduate", label: "جامعة", sub: "بكالوريوس / ليسانس" },
+  { value: "Graduate", label: "دراسات عليا", sub: "ماجستير / دكتوراه" },
 ];
 
 const TOTAL_STEPS = 5;
@@ -64,16 +64,16 @@ export default function QuestionFlow({ initialValues, onExit, onComplete }) {
   return (
     <div className="app-shell question-shell" data-theme="burnout">
       <div className="question-topbar">
-        <button type="button" className="q-brand-btn" onClick={onExit} aria-label="Back to ScrollCheck home">
+        <button type="button" className="q-brand-btn" onClick={onExit} aria-label="رجوع للرئيسية">
           <BrandLogo theme="burnout" size="sm" />
         </button>
 
         <span className="q-counter">
-          Question {step + 1} of {TOTAL_STEPS}
+          سؤال {step + 1} من {TOTAL_STEPS}
         </span>
 
         <button type="button" className="ghost-btn" onClick={onExit}>
-          Exit
+          خروج
         </button>
       </div>
 
@@ -88,8 +88,10 @@ export default function QuestionFlow({ initialValues, onExit, onComplete }) {
           {/* Step 1: App */}
           {step === 0 && (
             <div className="q-step-body">
-              <h1 className="q-title">Which app steals most of your screen time?</h1>
-              <p className="q-subtitle">Pick your #1 time-sink app — tapping moves right to the next step.</p>
+              <h1 className="q-title">أكتر أبلكيشن بياكل وقتك إيه؟</h1>
+              <p className="q-subtitle">
+                اختار الأبلكيشن اللي بتفتحه أكتر حاجة، وهننقل على طول للسؤال اللي بعده.
+              </p>
 
               <div className="q-tile-grid">
                 {PLATFORMS.map((p) => (
@@ -113,34 +115,34 @@ export default function QuestionFlow({ initialValues, onExit, onComplete }) {
           {/* Step 2: Daily Scrolling */}
           {step === 1 && (
             <div className="q-step-body">
-              <h1 className="q-title">Be honest — how many hours a day do you scroll?</h1>
-              <p className="q-subtitle">Drag the slider or tap a quick preset below.</p>
+              <h1 className="q-title">بصراحة.. بتقعد كام ساعة في اليوم على السوشيال؟</h1>
+              <p className="q-subtitle">حرّك السلايدر أو اختار أقرب رقم ليومك.</p>
 
               <div className="q-readout-box">
                 <div className="tabular-readout q-big-readout">
-                  {answers.daily_usage_hours.toFixed(1)} <span>hrs / day</span>
+                  {answers.daily_usage_hours.toFixed(1)} <span>ساعة في اليوم</span>
                 </div>
                 <div className="q-shock-pill">
-                  That adds up to <strong>{daysPerYear} full days a year</strong> on your screen
+                  يعني بتضيع <strong>{daysPerYear} يوم كامل في السنة</strong> على الشاشة
                 </div>
               </div>
 
-              <div className="q-slider-wrap">
+              <div className="q-slider-wrap" dir="ltr">
                 <input
                   type="range"
                   min="1.5"
                   max="9.0"
                   step="0.1"
-                  aria-label="Daily scrolling hours"
+                  aria-label="ساعات السكرول اليومية"
                   value={answers.daily_usage_hours}
                   onChange={(e) => update("daily_usage_hours", parseFloat(e.target.value))}
                 />
                 <div className="slider-scale">
-                  <span>1.5h</span>
+                  <span>1.5 س</span>
                   <span className="threshold-tick" style={{ left: `${((5.5 - 1.5) / (9.0 - 1.5)) * 100}%` }}>
-                    5.5h danger line
+                    5.5 س حد الخطر
                   </span>
-                  <span>9.0h</span>
+                  <span>9.0 س</span>
                 </div>
               </div>
 
@@ -161,10 +163,10 @@ export default function QuestionFlow({ initialValues, onExit, onComplete }) {
 
               <div className="q-nav-row">
                 <button type="button" className="ghost-btn q-back" onClick={() => setStep(0)}>
-                  Back
+                  رجوع
                 </button>
                 <button type="button" className="primary-btn q-next" onClick={() => setStep(2)}>
-                  Continue
+                  اللي بعده
                 </button>
               </div>
             </div>
@@ -173,38 +175,38 @@ export default function QuestionFlow({ initialValues, onExit, onComplete }) {
           {/* Step 3: Nightly Sleep */}
           {step === 2 && (
             <div className="q-step-body">
-              <h1 className="q-title">How much sleep do you usually get on weeknights?</h1>
-              <p className="q-subtitle">Sleep is the single biggest shield against screen burnout.</p>
+              <h1 className="q-title">بتنام كام ساعة في أيام الدراسة؟</h1>
+              <p className="q-subtitle">النوم هو أكتر حاجة بتحميك من الإرهاق وتشتيت المذاكرة.</p>
 
               <div className="q-readout-box">
                 <div className="tabular-readout q-big-readout">
-                  {answers.sleep_hours.toFixed(1)} <span>hrs / night</span>
+                  {answers.sleep_hours.toFixed(1)} <span>ساعة في الليل</span>
                 </div>
                 <div className={`q-shock-pill ${answers.sleep_hours >= 7.0 ? "is-good" : ""}`}>
                   {answers.sleep_hours < 6.5
-                    ? "Under 6.5h starts compounding burnout and brain fog"
+                    ? "أقل من 6.5 ساعات بيراكم إرهاق وتشتيت تاني يوم"
                     : answers.sleep_hours < 7.5
-                    ? "Close to baseline — 7.5h+ gives full recovery"
-                    : "Healthy recovery zone"}
+                    ? "قريب من المعقول، بس 7.5 ساعات بتفرق في التركيز"
+                    : "نوم مظبوط وبيديك طاقة تاني يوم"}
                 </div>
               </div>
 
-              <div className="q-slider-wrap">
+              <div className="q-slider-wrap" dir="ltr">
                 <input
                   type="range"
                   min="4.0"
                   max="9.5"
                   step="0.1"
-                  aria-label="Nightly sleep hours"
+                  aria-label="ساعات النوم"
                   value={answers.sleep_hours}
                   onChange={(e) => update("sleep_hours", parseFloat(e.target.value))}
                 />
                 <div className="slider-scale">
-                  <span>4.0h</span>
+                  <span>4.0 س</span>
                   <span className="threshold-tick" style={{ left: `${((6.5 - 4.0) / (9.5 - 4.0)) * 100}%` }}>
-                    6.5h minimum
+                    6.5 س أقل حاجة
                   </span>
-                  <span>9.5h</span>
+                  <span>9.5 س</span>
                 </div>
               </div>
 
@@ -225,10 +227,10 @@ export default function QuestionFlow({ initialValues, onExit, onComplete }) {
 
               <div className="q-nav-row">
                 <button type="button" className="ghost-btn q-back" onClick={() => setStep(1)}>
-                  Back
+                  رجوع
                 </button>
                 <button type="button" className="primary-btn q-next" onClick={() => setStep(3)}>
-                  Continue
+                  اللي بعده
                 </button>
               </div>
             </div>
@@ -237,8 +239,10 @@ export default function QuestionFlow({ initialValues, onExit, onComplete }) {
           {/* Step 4: Phone Tension */}
           {step === 3 && (
             <div className="q-step-body">
-              <h1 className="q-title">How often does social media cause stress, FOMO, or arguments?</h1>
-              <p className="q-subtitle">High tension around your phone strongly predicts lower grades.</p>
+              <h1 className="q-title">الموبايل بيعملك توتر أو خناقات أو FOMO قد إيه؟</h1>
+              <p className="q-subtitle">
+                التوتر والخناقات بسبب السوشيال ليهم علاقة مباشرة بهبوط الدرجات.
+              </p>
 
               <div className="q-stack-options">
                 {TENSION_OPTIONS.map((opt) => (
@@ -259,7 +263,7 @@ export default function QuestionFlow({ initialValues, onExit, onComplete }) {
 
               <div className="q-nav-row">
                 <button type="button" className="ghost-btn q-back" onClick={() => setStep(2)}>
-                  Back
+                  رجوع
                 </button>
               </div>
             </div>
@@ -268,8 +272,10 @@ export default function QuestionFlow({ initialValues, onExit, onComplete }) {
           {/* Step 5: Profile & Reveal */}
           {step === 4 && (
             <div className="q-step-body">
-              <h1 className="q-title">Last one — where are you in school?</h1>
-              <p className="q-subtitle">Helps match your closest real-world student twin in our 705-student cohort.</p>
+              <h1 className="q-title">آخر سؤال.. أنت في مرحلة إيه؟</h1>
+              <p className="q-subtitle">
+                عشان نطلعلك أقرب طالب شبهك بالظبط وسط الـ 705 طالب.
+              </p>
 
               <div className="q-stage-grid">
                 {STUDY_STAGES.map((st) => (
@@ -279,7 +285,7 @@ export default function QuestionFlow({ initialValues, onExit, onComplete }) {
                     className={`q-tile ${answers.academic_level === st.value ? "is-selected" : ""}`}
                     onClick={() => update("academic_level", st.value)}
                   >
-                    <strong>{st.value}</strong>
+                    <strong>{st.label}</strong>
                     <span>{st.sub}</span>
                   </button>
                 ))}
@@ -287,7 +293,7 @@ export default function QuestionFlow({ initialValues, onExit, onComplete }) {
 
               <div className="q-profile-extras">
                 <label className="mini-select">
-                  <span>Age</span>
+                  <span>السن</span>
                   <input
                     type="number"
                     min="16"
@@ -299,32 +305,32 @@ export default function QuestionFlow({ initialValues, onExit, onComplete }) {
                   />
                 </label>
                 <label className="mini-select">
-                  <span>Gender</span>
+                  <span>النوع</span>
                   <select value={answers.gender} onChange={(e) => update("gender", e.target.value)}>
-                    <option value="Female">Female</option>
-                    <option value="Male">Male</option>
-                    <option value="Other">Other</option>
+                    <option value="Female">بنت</option>
+                    <option value="Male">ولد</option>
+                    <option value="Other">تاني</option>
                   </select>
                 </label>
                 <label className="mini-select">
-                  <span>Relationship</span>
+                  <span>الحالة</span>
                   <select
                     value={answers.relationship_status}
                     onChange={(e) => update("relationship_status", e.target.value)}
                   >
-                    <option value="Single">Single</option>
-                    <option value="In Relationship">In Relationship</option>
-                    <option value="Complicated">Complicated</option>
+                    <option value="Single">سنجل</option>
+                    <option value="In Relationship">مرتبط</option>
+                    <option value="Complicated">معقدة شوية</option>
                   </select>
                 </label>
               </div>
 
               <div className="q-nav-row">
                 <button type="button" className="ghost-btn q-back" onClick={() => setStep(3)}>
-                  Back
+                  رجوع
                 </button>
                 <button type="button" className="primary-btn q-next" onClick={() => onComplete(answers)}>
-                  Reveal my result
+                  وريني النتيجة
                 </button>
               </div>
             </div>

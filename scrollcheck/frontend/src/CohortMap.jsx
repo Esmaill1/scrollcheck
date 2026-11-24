@@ -6,11 +6,23 @@ const PERSONA_COLORS = {
   "High Burnout Risk": "#FF5C7A",
 };
 
+const PERSONA_AR = {
+  Balanced: "متوازن ورايق",
+  "Moderate Risk": "ضغط متوسط",
+  "High Burnout Risk": "إرهاق عالي",
+};
+
+const LEVEL_AR = {
+  "High School": "ثانوي",
+  Undergraduate: "جامعة",
+  Graduate: "دراسات عليا",
+};
+
 const FILTER_OPTIONS = [
-  { id: "all", label: "All 705" },
+  { id: "all", label: "كل الـ 705" },
   { id: "TikTok", label: "TikTok" },
   { id: "Instagram", label: "Instagram" },
-  { id: "Undergrad", label: "Undergrads" },
+  { id: "Undergrad", label: "طلبة جامعة" },
 ];
 
 const WIDTH = 760;
@@ -84,13 +96,13 @@ export default function CohortMap({
     <div className="panel cohort-map-panel">
       <div className="cohort-map-header">
         <div>
-          <h2 className="section-title">Where you sit among 705 real students</h2>
+          <h2 className="section-title">مكانك وسط 705 طالب حقيقي</h2>
           <p className="section-caption">
-            Each dot is one real student from our 705-student survey. Dots on the left are rested and balanced; dots on the right face heavy scrolling and burnout. Hover any dot to inspect them.
+            كل نقطة هنا طالب حقيقي من الاستبيان. الشمال يعني نوم مظبوط وتوازن، واليمين يعني سكرول كتير وإرهاق. شاور على أي نقطة تشوف تفاصيلها.
           </p>
         </div>
 
-        <div className="map-filter-strip" role="group" aria-label="Filter cohort">
+        <div className="map-filter-strip" role="group" aria-label="فلتر الطلبة">
           {FILTER_OPTIONS.map((opt) => (
             <button
               key={opt.id}
@@ -104,20 +116,20 @@ export default function CohortMap({
         </div>
       </div>
 
-      <div className="map-legend-inline" aria-label="Map marker legend">
-        <span><i style={{ background: PERSONA_COLORS.Balanced }} />Balanced</span>
-        <span><i style={{ background: PERSONA_COLORS["Moderate Risk"] }} />Moderate risk</span>
-        <span><i style={{ background: PERSONA_COLORS["High Burnout Risk"] }} />High burnout</span>
-        <span><i className="legend-dot-you" />You (live)</span>
-        <span><i className="legend-dot-twin" />Closest twin</span>
+      <div className="map-legend-inline" aria-label="دليل ألوان الخريطة">
+        <span><i style={{ background: PERSONA_COLORS.Balanced }} />متوازن</span>
+        <span><i style={{ background: PERSONA_COLORS["Moderate Risk"] }} />ضغط متوسط</span>
+        <span><i style={{ background: PERSONA_COLORS["High Burnout Risk"] }} />إرهاق عالي</span>
+        <span><i className="legend-dot-you" />أنت دلوقتي</span>
+        <span><i className="legend-dot-twin" />توأمك في البيانات</span>
       </div>
 
-      <div className="svg-frame">
+      <div className="svg-frame" dir="ltr">
         <svg
           viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
           className="cohort-svg"
           role="img"
-          aria-label="Interactive scatter map of 705 students grouped by screen time, sleep, and mental well-being"
+          aria-label="خريطة تفاعلية لـ 705 طالب حسب وقت الموبايل والنوم"
         >
           <defs>
             <marker
@@ -133,7 +145,6 @@ export default function CohortMap({
             </marker>
           </defs>
 
-          {/* Hairline crosshairs */}
           <line
             x1={PAD.left}
             y1={originPx.py}
@@ -153,7 +164,6 @@ export default function CohortMap({
             strokeDasharray="3 5"
           />
 
-          {/* Real student dots */}
           {visibleStudents.map((s) => {
             const { px, py } = toPx(s.x, s.y);
             const isHovered = hovered && hovered.id === s.id;
@@ -175,22 +185,21 @@ export default function CohortMap({
             );
           })}
 
-          {/* Cluster labels */}
           {centroids.map((c) => {
             const { px, py } = toPx(c.x, c.y);
             const color = PERSONA_COLORS[c.persona] || "var(--ink-primary)";
             const labelText =
               c.persona === "High Burnout Risk"
-                ? `Burnout (${c.count})`
+                ? `إرهاق (${c.count})`
                 : c.persona === "Moderate Risk"
-                ? `Moderate (${c.count})`
-                : `Balanced (${c.count})`;
+                ? `متوسط (${c.count})`
+                : `متوازن (${c.count})`;
             return (
               <g key={c.persona} transform={`translate(${px}, ${py - 18})`} pointerEvents="none">
                 <rect
-                  x="-50"
+                  x="-48"
                   y="-11"
-                  width="100"
+                  width="96"
                   height="20"
                   rx="10"
                   fill="var(--surface-elevated)"
@@ -201,12 +210,12 @@ export default function CohortMap({
                 />
                 <text
                   x="0"
-                  y="2.5"
+                  y="3"
                   textAnchor="middle"
                   fontSize="10.5"
                   fontWeight="700"
                   fill={color}
-                  fontFamily="Space Grotesk, sans-serif"
+                  fontFamily="Cairo, sans-serif"
                 >
                   {labelText}
                 </text>
@@ -214,7 +223,6 @@ export default function CohortMap({
             );
           })}
 
-          {/* Link from You -> Nearest Twin */}
           {twinPx && userPx && (
             <g pointerEvents="none">
               <line
@@ -238,7 +246,6 @@ export default function CohortMap({
             </g>
           )}
 
-          {/* Start -> You trajectory */}
           {basePx && userPx && Math.hypot(userPx.px - basePx.px, userPx.py - basePx.py) > 6 && (
             <g pointerEvents="none">
               <line
@@ -262,19 +269,18 @@ export default function CohortMap({
               />
               <text
                 x={basePx.px}
-                y={basePx.py + 19}
+                y={basePx.py + 20}
                 textAnchor="middle"
                 fontSize="10.5"
                 fontWeight="700"
                 fill="var(--ink-secondary)"
-                fontFamily="Space Grotesk, sans-serif"
+                fontFamily="Cairo, sans-serif"
               >
-                Start
+                البداية
               </text>
             </g>
           )}
 
-          {/* Live User Beacon */}
           {userPx && (
             <g
               className="user-beacon"
@@ -289,23 +295,23 @@ export default function CohortMap({
                 strokeWidth="2.5"
               />
               <rect
-                x="-20"
-                y="-30"
-                width="40"
-                height="18"
-                rx="9"
+                x="-21"
+                y="-31"
+                width="42"
+                height="19"
+                rx="9.5"
                 fill="var(--ink-primary)"
               />
               <text
                 x="0"
-                y="-17.5"
+                y="-18"
                 textAnchor="middle"
                 fontSize="10.5"
                 fontWeight="700"
                 fill="var(--bg-canvas)"
-                fontFamily="Bricolage Grotesque, sans-serif"
+                fontFamily="Cairo, sans-serif"
               >
-                You
+                أنت
               </text>
             </g>
           )}
@@ -316,9 +322,9 @@ export default function CohortMap({
             textAnchor="start"
             fontSize="11"
             fill="var(--ink-secondary)"
-            fontFamily="Space Grotesk, sans-serif"
+            fontFamily="IBM Plex Sans Arabic, sans-serif"
           >
-            Rested &amp; balanced
+            نوم مظبوط وتوازن
           </text>
           <text
             x={WIDTH - PAD.right}
@@ -326,46 +332,45 @@ export default function CohortMap({
             textAnchor="end"
             fontSize="11"
             fill="var(--ink-secondary)"
-            fontFamily="Space Grotesk, sans-serif"
+            fontFamily="IBM Plex Sans Arabic, sans-serif"
           >
-            Heavy scrolling &amp; tension
+            سكرول وضغط عالي
           </text>
         </svg>
 
         {hovered && (
-          <div className="student-tooltip" role="status">
+          <div className="student-tooltip" dir="rtl" role="status">
             <div className="tooltip-top">
               <strong>
-                Student #{hovered.id} ({hovered.age}y, {hovered.country})
+                طالب #{hovered.id} ({hovered.age} سنة، {hovered.country})
               </strong>
               <span className="tooltip-tag" style={{ color: PERSONA_COLORS[hovered.persona] }}>
-                {hovered.persona}
+                {PERSONA_AR[hovered.persona] || hovered.persona}
               </span>
             </div>
             <div className="tooltip-grid">
-              <span>{hovered.usage_hours}h screen / day</span>
-              <span>{hovered.sleep_hours}h sleep / night</span>
-              <span>{hovered.conflicts} tension score</span>
-              <span>Well-being {hovered.mental_health}/10</span>
+              <span>موبايل {hovered.usage_hours} س/يوم</span>
+              <span>نوم {hovered.sleep_hours} س/ليل</span>
+              <span>توتر {hovered.conflicts}/5</span>
+              <span>نفسية {hovered.mental_health}/10</span>
               <span>{hovered.platform}</span>
-              <span>Grades hurt: {hovered.academics_affected}</span>
+              <span>أثّر على درجاته: {hovered.academics_affected === "Yes" ? "آه" : "لأ"}</span>
             </div>
           </div>
         )}
       </div>
 
-      {/* Real-world Data Twin strip */}
       {nearestTwin && (
         <div className="twin-strip">
           <div className="twin-badge">
-            <span className="tabular-readout">{nearestTwin.similarity_pct}%</span> match
+            تشابه <span className="tabular-readout">{nearestTwin.similarity_pct}%</span>
           </div>
           <p className="twin-copy">
-            <strong>Your real-world data twin:</strong> Student #{nearestTwin.id} ({nearestTwin.age}y{" "}
-            {nearestTwin.academic_level} in {nearestTwin.country}) — uses{" "}
-            <strong>{nearestTwin.platform}</strong> for {nearestTwin.usage_hours}h/day, sleeps{" "}
-            {nearestTwin.sleep_hours}h, well-being {nearestTwin.mental_health}/10, grades hurt:{" "}
-            <strong>{nearestTwin.academics_affected}</strong>.
+            <strong>أقرب طالب شبهك في البيانات:</strong> طالب #{nearestTwin.id} ({nearestTwin.age} سنة،{" "}
+            {LEVEL_AR[nearestTwin.academic_level] || nearestTwin.academic_level} من {nearestTwin.country}) —
+            بيستخدم <strong>{nearestTwin.platform}</strong> {nearestTwin.usage_hours} س/يوم، بينام{" "}
+            {nearestTwin.sleep_hours} س، نفسيته {nearestTwin.mental_health}/10، ومستواه الدراسي اتأثر:{" "}
+            <strong>{nearestTwin.academics_affected === "Yes" ? "آه" : "لأ"}</strong>.
           </p>
         </div>
       )}

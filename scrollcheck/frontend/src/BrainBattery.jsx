@@ -3,16 +3,16 @@ export default function BrainBattery({ score, persona }) {
 
   const tone =
     persona === "Balanced"
-      ? { fill: "#10B981", glow: "rgba(16, 185, 129, 0.28)", face: "#064E3B", label: "Charged" }
+      ? { fill: "#10B981", face: "#064E3B", label: "مشحون" }
       : persona === "Moderate Risk"
-      ? { fill: "#F59E0B", glow: "rgba(245, 158, 11, 0.25)", face: "#451A03", label: "Draining" }
-      : { fill: "#FF5C7A", glow: "rgba(255, 92, 122, 0.35)", face: "#2A0814", label: "Low battery" };
+      ? { fill: "#F59E0B", face: "#451A03", label: "بيفصل" }
+      : { fill: "#FF5C7A", face: "#2A0814", label: "البطارية واقعة" };
 
   const fillHeight = Math.max(14, (pct / 100) * 84);
   const fillY = 108 - fillHeight;
 
   return (
-    <div className="battery-widget" aria-label={`Mental energy battery at ${pct}%`}>
+    <div className="battery-widget" aria-label={`شحن طاقتك الذهنية ${pct}%`}>
       <svg viewBox="0 0 110 128" className="battery-svg">
         <defs>
           <clipPath id="battery-inner-clip">
@@ -20,10 +20,8 @@ export default function BrainBattery({ score, persona }) {
           </clipPath>
         </defs>
 
-        {/* Battery terminal cap */}
         <rect x="41" y="6" width="28" height="10" rx="4" fill="currentColor" fillOpacity="0.35" />
 
-        {/* Outer shell */}
         <rect
           x="15"
           y="18"
@@ -35,7 +33,6 @@ export default function BrainBattery({ score, persona }) {
           strokeWidth="3.5"
         />
 
-        {/* Animated liquid charge level */}
         <g clipPath="url(#battery-inner-clip)">
           <rect
             x="19"
@@ -56,7 +53,6 @@ export default function BrainBattery({ score, persona }) {
           />
         </g>
 
-        {/* Expressive mascot face */}
         {persona === "Balanced" && (
           <g stroke={tone.face} strokeWidth="3" strokeLinecap="round" fill="none">
             <path d="M 37 58 Q 41 52 45 58" />
@@ -80,7 +76,6 @@ export default function BrainBattery({ score, persona }) {
             <path d="M 36 53 L 44 59 M 44 53 L 36 59" />
             <path d="M 66 53 L 74 59 M 74 53 L 66 59" />
             <path d="M 44 75 Q 55 67 66 75" />
-            {/* Sweat drop */}
             <path
               d="M 81 37 C 81 37 85 43 85 46 A 4 4 0 1 1 77 46 C 77 43 81 37 81 37 Z"
               fill="#93C5FD"

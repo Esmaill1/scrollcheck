@@ -23,9 +23,9 @@ export default function DayRing({ usageHours, sleepHours, semesterImpact }) {
 
   return (
     <div className="day-ring-widget">
-      <div className="day-ring-title">Where your 24 hours go</div>
+      <div className="day-ring-title">الـ 24 ساعة بتوعك رايحين فين</div>
       <div className="day-ring-visual">
-        <svg viewBox="0 0 120 120" className="day-ring-svg" role="img" aria-label="24-hour daily time split">
+        <svg viewBox="0 0 120 120" className="day-ring-svg" role="img" aria-label="تقسيمة يومك الـ 24 ساعة">
           <circle
             cx="60"
             cy="60"
@@ -34,7 +34,6 @@ export default function DayRing({ usageHours, sleepHours, semesterImpact }) {
             stroke="var(--ring-track)"
             strokeWidth="13"
           />
-          {/* Life & Study */}
           <circle
             cx="60"
             cy="60"
@@ -47,7 +46,6 @@ export default function DayRing({ usageHours, sleepHours, semesterImpact }) {
             transform="rotate(-90 60 60)"
             className="ring-arc"
           />
-          {/* Sleep */}
           <circle
             cx="60"
             cy="60"
@@ -60,7 +58,6 @@ export default function DayRing({ usageHours, sleepHours, semesterImpact }) {
             transform="rotate(-90 60 60)"
             className="ring-arc"
           />
-          {/* Scrolling */}
           <circle
             cx="60"
             cy="60"
@@ -75,43 +72,43 @@ export default function DayRing({ usageHours, sleepHours, semesterImpact }) {
           />
           <text
             x="60"
-            y="56"
+            y="55"
             textAnchor="middle"
-            fontSize="16"
+            fontSize="14.5"
             fontWeight="800"
             fill="var(--ink-primary)"
-            fontFamily="Bricolage Grotesque, sans-serif"
+            fontFamily="Cairo, sans-serif"
           >
-            {daysYear}d
+            {daysYear} يوم
           </text>
           <text
             x="60"
             y="71"
             textAnchor="middle"
-            fontSize="8.8"
+            fontSize="9"
             fontWeight="600"
             fill="var(--ink-secondary)"
-            fontFamily="Space Grotesk, sans-serif"
+            fontFamily="IBM Plex Sans Arabic, sans-serif"
           >
-            scrolling/yr
+            سكرول/سنة
           </text>
         </svg>
       </div>
 
       <div className="day-ring-facts">
         <div className="ring-legend-row">
-          <span><i style={{ background: "var(--ring-scroll)" }} />Scroll {usageHours.toFixed(1)}h</span>
-          <span><i style={{ background: "var(--ring-sleep)" }} />Sleep {sleepHours.toFixed(1)}h</span>
-          <span><i style={{ background: "var(--ring-life)" }} />Free {Math.max(0, 24 - usageHours - sleepHours).toFixed(1)}h</span>
+          <span><i style={{ background: "var(--ring-scroll)" }} />سكرول {usageHours.toFixed(1)} س</span>
+          <span><i style={{ background: "var(--ring-sleep)" }} />نوم {sleepHours.toFixed(1)} س</span>
+          <span><i style={{ background: "var(--ring-life)" }} />باقي اليوم {Math.max(0, 24 - usageHours - sleepHours).toFixed(1)} س</span>
         </div>
         <div className="semester-pills">
           <div className="sem-stat">
-            <strong className="tabular-readout">{semScroll} hrs</strong>
-            <span>scrolling per semester</span>
+            <strong className="tabular-readout">{semScroll} ساعة</strong>
+            <span>سكرول في الترم</span>
           </div>
           <div className="sem-stat">
-            <strong className="tabular-readout">{semDebt} hrs</strong>
-            <span>semester sleep debt</span>
+            <strong className="tabular-readout">{semDebt} ساعة</strong>
+            <span>نقص نوم في الترم</span>
           </div>
         </div>
       </div>

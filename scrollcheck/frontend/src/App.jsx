@@ -9,7 +9,7 @@ import QuestionFlow from "./QuestionFlow.jsx";
 const PRESETS = [
   {
     id: "tiktok_spiral",
-    label: "2 AM TikTok",
+    label: "سهرة 2 الفجر",
     values: {
       age: 19,
       daily_usage_hours: 6.8,
@@ -23,7 +23,7 @@ const PRESETS = [
   },
   {
     id: "exam_zombie",
-    label: "Exam week",
+    label: "أسبوع ميدترم",
     values: {
       age: 20,
       daily_usage_hours: 5.1,
@@ -37,7 +37,7 @@ const PRESETS = [
   },
   {
     id: "morning_legend",
-    label: "Morning person",
+    label: "صاحي بدري ورايق",
     values: {
       age: 22,
       daily_usage_hours: 2.8,
@@ -54,36 +54,48 @@ const PRESETS = [
 const POWER_UPS = [
   {
     id: "no_phone_bed",
-    label: "Phone outside bedroom",
-    effect: "-1.2h screen, +0.9h sleep",
+    label: "سيب الموبايل بره الأوضة",
+    effect: "-1.2 س شاشة، +0.9 س نوم",
     usageDelta: -1.2,
     sleepDelta: 0.9,
     conflictsDelta: 0,
   },
   {
     id: "no_reels",
-    label: "No Reels till Friday",
-    effect: "-1.8h screen",
+    label: "اقفل الريلز لحد الجمعة",
+    effect: "-1.8 س شاشة",
     usageDelta: -1.8,
     sleepDelta: 0,
     conflictsDelta: 0,
   },
   {
     id: "mute_study",
-    label: "Mute chats while studying",
-    effect: "-2 tension",
+    label: "ميوت للجروبات وقت المذاكرة",
+    effect: "-2 توتر",
     usageDelta: 0,
     sleepDelta: 0,
     conflictsDelta: -2,
   },
   {
     id: "lights_out",
-    label: "11 PM lights out",
-    effect: "+1.5h sleep",
+    label: "نوم الساعة 11 بالليل",
+    effect: "+1.5 س نوم",
     usageDelta: 0,
     sleepDelta: 1.5,
     conflictsDelta: 0,
   },
+];
+
+const PERSONA_AR = {
+  Balanced: "متوازن ورايق",
+  "Moderate Risk": "ضغط متوسط",
+  "High Burnout Risk": "إرهاق عالي",
+};
+
+const STUDY_STAGE_BUTTONS = [
+  { value: "High School", label: "ثانوي" },
+  { value: "Undergraduate", label: "جامعة" },
+  { value: "Graduate", label: "دراسات عليا" },
 ];
 
 const DEFAULT_PLATFORMS = [
@@ -102,7 +114,7 @@ function clamp(val, min, max) {
 }
 
 export default function App() {
-  const [stage, setStage] = useState("landing"); // "landing" | "questions" | "analyzing" | "board"
+  const [stage, setStage] = useState("landing");
   const [baseForm, setBaseForm] = useState(PRESETS[0].values);
   const [activePowerUps, setActivePowerUps] = useState([]);
   const [cohort, setCohort] = useState({
@@ -113,7 +125,7 @@ export default function App() {
   });
   const [sim, setSim] = useState(null);
   const [baseline, setBaseline] = useState(null);
-  const [profileSource, setProfileSource] = useState("Sample: 2 AM TikTok");
+  const [profileSource, setProfileSource] = useState("مثال: سهرة 2 الفجر");
   const [copied, setCopied] = useState(false);
   const [apiError, setApiError] = useState(null);
 
@@ -139,12 +151,11 @@ export default function App() {
     };
   }, [baseForm, activePowerUps]);
 
-  // Preload 705-student cohort immediately
   useEffect(() => {
     let active = true;
     fetch("/api/cohort")
       .then((res) => {
-        if (!res.ok) throw new Error(`Backend responded with ${res.status}`);
+        if (!res.ok) throw new Error(`السيرفر رد بكود ${res.status}`);
         return res.json();
       })
       .then((data) => {
@@ -158,7 +169,6 @@ export default function App() {
     };
   }, []);
 
-  // Live simulation whenever on the interactive board
   useEffect(() => {
     if (stage !== "board") return;
     let active = true;
@@ -169,7 +179,7 @@ export default function App() {
         body: JSON.stringify(effectiveForm),
       })
         .then((res) => {
-          if (!res.ok) throw new Error(`Simulation failed (${res.status})`);
+          if (!res.ok) throw new Error(`حصل مشكلة في الحساب (${res.status})`);
           return res.json();
         })
         .then((data) => {
@@ -193,7 +203,7 @@ export default function App() {
     setStage("analyzing");
     setActivePowerUps([]);
     setBaseForm(answers);
-    setProfileSource("Your quiz result");
+    setProfileSource("نتيجتك من الاختبار");
 
     const startedAt = Date.now();
     try {
@@ -202,10 +212,9 @@ export default function App() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(answers),
       });
-      if (!res.ok) throw new Error(`Simulation failed (${res.status})`);
+      if (!res.ok) throw new Error(`حصل مشكلة في الحساب (${res.status})`);
       const data = await res.json();
 
-      // Brief smooth transition beat so the reveal feels intentional
       const elapsed = Date.now() - startedAt;
       if (elapsed < 480) {
         await new Promise((r) => setTimeout(r, 480 - elapsed));
@@ -222,14 +231,14 @@ export default function App() {
   };
 
   const updateBaseField = (key, value) => {
-    setProfileSource("Your custom routine");
+    setProfileSource("روتينك المعدّل");
     setBaseForm((prev) => ({ ...prev, [key]: value }));
   };
 
   const applyPreset = (preset) => {
     setBaseline(null);
     setActivePowerUps([]);
-    setProfileSource(`Sample: ${preset.label}`);
+    setProfileSource(`مثال: ${preset.label}`);
     setBaseForm(preset.values);
   };
 
@@ -237,7 +246,7 @@ export default function App() {
     if (!baseline && sim) {
       setBaseline({ baseForm: { ...baseForm }, activePowerUps: [...activePowerUps], result: sim });
     }
-    setProfileSource("Your custom routine");
+    setProfileSource("روتينك المعدّل");
     setActivePowerUps((prev) =>
       prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
     );
@@ -259,7 +268,7 @@ export default function App() {
     if (!baseline) {
       setBaseline({ baseForm: { ...baseForm }, activePowerUps: [...activePowerUps], result: sim });
     }
-    setProfileSource("Recommended detox plan");
+    setProfileSource("خطة التعديل المقترحة");
     setActivePowerUps([]);
     setBaseForm((prev) => ({
       ...prev,
@@ -272,10 +281,10 @@ export default function App() {
   const copyWrappedSummary = () => {
     if (!sim) return;
     const summary = [
-      `ScrollCheck Result: ${sim.archetype?.title || sim.persona}`,
-      `Routine: ${effectiveForm.daily_usage_hours}h/day on ${effectiveForm.platform}, ${effectiveForm.sleep_hours}h sleep, ${effectiveForm.conflicts}/5 tension`,
-      `Mental Battery: ${Math.round((sim.mental_health_score / 10) * 100)}% (${sim.mental_health_score}/10) | Grade Risk: ${Math.round(sim.academic_risk_prob * 100)}%`,
-      `Scrolling footprint: ${sim.semester_impact?.days_per_year_scrolling} full days/year`,
+      `نتيجتي في ScrollCheck: ${sim.archetype?.title || PERSONA_AR[sim.persona]}`,
+      `الروتين: ${effectiveForm.daily_usage_hours} س/يوم على ${effectiveForm.platform}، نوم ${effectiveForm.sleep_hours} س، توتر ${effectiveForm.conflicts}/5`,
+      `شحن النفسية: ${Math.round((sim.mental_health_score / 10) * 100)}% (${sim.mental_health_score}/10) | خطر على الدرجات: ${Math.round(sim.academic_risk_prob * 100)}%`,
+      `إجمالي وقت الشاشة في السنة: ${sim.semester_impact?.days_per_year_scrolling} يوم كامل`,
     ].join("\n");
     navigator.clipboard?.writeText(summary).then(() => {
       setCopied(true);
@@ -283,7 +292,6 @@ export default function App() {
     });
   };
 
-  // Stage 1: Full-screen welcome
   if (stage === "landing") {
     return (
       <LandingScreen
@@ -291,7 +299,7 @@ export default function App() {
         onSkipToBoard={() => {
           setBaseline(null);
           setActivePowerUps([]);
-          setProfileSource(`Sample: ${PRESETS[0].label}`);
+          setProfileSource(`مثال: ${PRESETS[0].label}`);
           setBaseForm(PRESETS[0].values);
           setStage("board");
         }}
@@ -299,7 +307,6 @@ export default function App() {
     );
   }
 
-  // Stage 2: Full-screen one-by-one questions
   if (stage === "questions") {
     return (
       <QuestionFlow
@@ -310,20 +317,18 @@ export default function App() {
     );
   }
 
-  // Brief analyzing beat between Question 5 and Result Board
   if (stage === "analyzing") {
     return (
       <div className="app-shell analyzing-shell" data-theme="burnout">
         <div className="analyzing-card">
           <div className="analyzing-spinner" aria-hidden="true" />
-          <h2>Comparing your habits against 705 real students...</h2>
-          <p>Matching your data twin, calculating grade risk, and finding your smallest detox fix.</p>
+          <h2>بنقارن يومك بـ 705 طالب حقيقي...</h2>
+          <p>بنحسب مستوى الإرهاق، وبندور على أقرب طالب شبهك، وأسهل تعديل يظبطلك يومك.</p>
         </div>
       </div>
     );
   }
 
-  // Stage 3: Result + Interactive What-If Board
   const persona = sim?.persona || "High Burnout Risk";
   const themeKey =
     sim?.archetype?.theme ||
@@ -344,19 +349,19 @@ export default function App() {
   return (
     <div className="app-shell" data-theme={themeKey}>
       <header className="topbar">
-        <button type="button" className="brand-home-btn" onClick={() => setStage("landing")} aria-label="ScrollCheck home">
+        <button type="button" className="brand-home-btn" onClick={() => setStage("landing")} aria-label="الرجوع لبداية ScrollCheck">
           <div className="brand-lockup">
             <BrandLogo theme={themeKey} size="md" />
-            <p className="brand-subtitle">Your result &amp; interactive detox board</p>
+            <p className="brand-subtitle">نتيجتك وبورد التجربة</p>
           </div>
         </button>
 
         <div className="topbar-actions">
           <button type="button" className="vibe-check-btn" onClick={() => setStage("questions")}>
-            Retake quiz
+            عيد الاختبار
           </button>
 
-          <div className="preset-strip" role="group" aria-label="Sample routines">
+          <div className="preset-strip" role="group" aria-label="أمثلة جاهزة">
             {PRESETS.map((p) => {
               const isCurrent =
                 activePowerUps.length === 0 &&
@@ -378,29 +383,29 @@ export default function App() {
           </div>
 
           <button type="button" className="share-btn" onClick={copyWrappedSummary} disabled={!sim}>
-            {copied ? "Copied!" : "Share result"}
+            {copied ? "اتنسخت" : "انسخ النتيجة"}
           </button>
         </div>
       </header>
 
       {apiError && (
         <div className="error-banner" role="alert">
-          Model service offline ({apiError}). Make sure FastAPI is running on port 8000.
+          سيرفر الموديل مش شغال ({apiError}). اتأكد إن FastAPI شغال على بورت 8000.
         </div>
       )}
 
       <main className="workspace">
         {/* LEFT INTERACTIVE LAB */}
-        <aside className="panel control-rail" aria-label="Routine controls">
+        <aside className="panel control-rail" aria-label="تعديل الروتين">
           <div className="rail-header">
-            <h2 className="section-title">Tune your habits</h2>
+            <h2 className="section-title">ظبّط روتينك</h2>
             <div className="baseline-actions">
               <button type="button" className="ghost-btn" onClick={pinStartingPoint} disabled={!sim}>
-                {baseline ? "Re-pin start" : "Pin start"}
+                {baseline ? "حدّث البداية" : "ثبّت البداية"}
               </button>
               {baseline && (
                 <button type="button" className="ghost-btn" onClick={resetToBaseline}>
-                  Reset
+                  رجّع للأول
                 </button>
               )}
             </div>
@@ -409,19 +414,19 @@ export default function App() {
           {/* Stackable Detox Power-Ups */}
           <div className="powerup-section">
             <div className="powerup-head">
-              <span className="field-caption">Detox power-ups</span>
+              <span className="field-caption">خطوات ديتوكس سريعة</span>
               {activePowerUps.length > 0 && (
                 <button
                   type="button"
                   className="clear-powerups-btn"
                   onClick={() => setActivePowerUps([])}
                 >
-                  Clear ({activePowerUps.length})
+                  امسح ({activePowerUps.length})
                 </button>
               )}
             </div>
             <p className="panel-subnote">
-              Tap any real-life habit tweak to preview what happens if you try it this week.
+              جرّب تدوس على خطوة أو اتنين وشوف يومك هيتغير قد إيه لو نفذتهم الأسبوع ده.
             </p>
             <div className="powerup-grid">
               {POWER_UPS.map((p) => {
@@ -444,16 +449,16 @@ export default function App() {
 
           <div className="control-group">
             <div className="control-label-row">
-              <label htmlFor="usage-slider">Daily scrolling</label>
+              <label htmlFor="usage-slider">السكرول في اليوم</label>
               <span className="tabular-readout">
-                {effectiveForm.daily_usage_hours.toFixed(1)} hrs
+                {effectiveForm.daily_usage_hours.toFixed(1)} س
                 {activePowerUps.length > 0 &&
                   effectiveForm.daily_usage_hours !== baseForm.daily_usage_hours && (
-                    <em className="delta-inline"> (was {baseForm.daily_usage_hours.toFixed(1)}h)</em>
+                    <em className="delta-inline"> (بدل {baseForm.daily_usage_hours.toFixed(1)} س)</em>
                   )}
               </span>
             </div>
-            <div className="slider-wrap">
+            <div className="slider-wrap" dir="ltr">
               <input
                 id="usage-slider"
                 type="range"
@@ -464,27 +469,27 @@ export default function App() {
                 onChange={(e) => updateBaseField("daily_usage_hours", parseFloat(e.target.value))}
               />
               <div className="slider-scale">
-                <span>1.5h</span>
+                <span>1.5 س</span>
                 <span className="threshold-tick" style={{ left: `${((5.5 - 1.5) / (9.0 - 1.5)) * 100}%` }}>
-                  5.5h danger line
+                  5.5 س حد الخطر
                 </span>
-                <span>9.0h</span>
+                <span>9.0 س</span>
               </div>
             </div>
           </div>
 
           <div className="control-group">
             <div className="control-label-row">
-              <label htmlFor="sleep-slider">Nightly sleep</label>
+              <label htmlFor="sleep-slider">النوم بالليل</label>
               <span className="tabular-readout">
-                {effectiveForm.sleep_hours.toFixed(1)} hrs
+                {effectiveForm.sleep_hours.toFixed(1)} س
                 {activePowerUps.length > 0 &&
                   effectiveForm.sleep_hours !== baseForm.sleep_hours && (
-                    <em className="delta-inline"> (was {baseForm.sleep_hours.toFixed(1)}h)</em>
+                    <em className="delta-inline"> (بدل {baseForm.sleep_hours.toFixed(1)} س)</em>
                   )}
               </span>
             </div>
-            <div className="slider-wrap">
+            <div className="slider-wrap" dir="ltr">
               <input
                 id="sleep-slider"
                 type="range"
@@ -495,21 +500,21 @@ export default function App() {
                 onChange={(e) => updateBaseField("sleep_hours", parseFloat(e.target.value))}
               />
               <div className="slider-scale">
-                <span>4.0h</span>
+                <span>4.0 س</span>
                 <span className="threshold-tick" style={{ left: `${((6.5 - 4.0) / (9.5 - 4.0)) * 100}%` }}>
-                  6.5h minimum
+                  6.5 س أقل حاجة
                 </span>
-                <span>9.5h</span>
+                <span>9.5 س</span>
               </div>
             </div>
           </div>
 
           <div className="control-group">
             <div className="control-label-row">
-              <label htmlFor="conflicts-slider">Phone drama &amp; tension</label>
+              <label htmlFor="conflicts-slider">توتر وخناقات السوشيال</label>
               <span className="tabular-readout">{effectiveForm.conflicts} / 5</span>
             </div>
-            <div className="slider-wrap">
+            <div className="slider-wrap" dir="ltr">
               <input
                 id="conflicts-slider"
                 type="range"
@@ -520,17 +525,17 @@ export default function App() {
                 onChange={(e) => updateBaseField("conflicts", parseInt(e.target.value, 10))}
               />
               <div className="slider-scale">
-                <span>0 chill</span>
+                <span>0 رايق</span>
                 <span className="threshold-tick" style={{ left: `${(3 / 5) * 100}%` }}>
-                  3+ hits grades
+                  3+ بيأثر عالدرجات
                 </span>
-                <span>5 nonstop</span>
+                <span>5 طول الوقت</span>
               </div>
             </div>
           </div>
 
           <div className="control-group">
-            <span className="field-caption">Main time-sink app</span>
+            <span className="field-caption">أكتر أبلكيشن بتفتحه</span>
             <div className="pill-grid">
               {(cohort.platforms?.length ? cohort.platforms : DEFAULT_PLATFORMS).map((plat) => (
                 <button
@@ -546,16 +551,16 @@ export default function App() {
           </div>
 
           <div className="control-group">
-            <span className="field-caption">Study stage</span>
+            <span className="field-caption">المرحلة الدراسية</span>
             <div className="pill-row">
-              {["High School", "Undergraduate", "Graduate"].map((lvl) => (
+              {STUDY_STAGE_BUTTONS.map((lvl) => (
                 <button
-                  key={lvl}
+                  key={lvl.value}
                   type="button"
-                  className={`choice-pill ${baseForm.academic_level === lvl ? "is-selected" : ""}`}
-                  onClick={() => updateBaseField("academic_level", lvl)}
+                  className={`choice-pill ${baseForm.academic_level === lvl.value ? "is-selected" : ""}`}
+                  onClick={() => updateBaseField("academic_level", lvl.value)}
                 >
-                  {lvl}
+                  {lvl.label}
                 </button>
               ))}
             </div>
@@ -563,7 +568,7 @@ export default function App() {
 
           <div className="compact-selectors">
             <label className="mini-select">
-              <span>Age</span>
+              <span>السن</span>
               <input
                 type="number"
                 min="16"
@@ -575,22 +580,22 @@ export default function App() {
               />
             </label>
             <label className="mini-select">
-              <span>Gender</span>
+              <span>النوع</span>
               <select value={baseForm.gender} onChange={(e) => updateBaseField("gender", e.target.value)}>
-                <option value="Female">Female</option>
-                <option value="Male">Male</option>
-                <option value="Other">Other</option>
+                <option value="Female">بنت</option>
+                <option value="Male">ولد</option>
+                <option value="Other">تاني</option>
               </select>
             </label>
             <label className="mini-select">
-              <span>Status</span>
+              <span>الحالة</span>
               <select
                 value={baseForm.relationship_status}
                 onChange={(e) => updateBaseField("relationship_status", e.target.value)}
               >
-                <option value="Single">Single</option>
-                <option value="In Relationship">In Relationship</option>
-                <option value="Complicated">Complicated</option>
+                <option value="Single">سنجل</option>
+                <option value="In Relationship">مرتبط</option>
+                <option value="Complicated">معقدة شوية</option>
               </select>
             </label>
           </div>
@@ -605,26 +610,26 @@ export default function App() {
               <div className="archetype-copy">
                 <div className="badge-row">
                   <span className="source-chip">{profileSource}</span>
-                  <span className={`persona-pill tone-${themeKey}`}>{persona}</span>
+                  <span className={`persona-pill tone-${themeKey}`}>{PERSONA_AR[persona] || persona}</span>
                   {baseline && (mhDelta !== 0 || riskDelta !== 0) && (
                     <span className="delta-chip">
-                      {mhDelta >= 0 ? `+${mhDelta}` : mhDelta} well-being ·{" "}
-                      {riskDelta > 0 ? `+${riskDelta}%` : `${riskDelta}%`} grade risk
+                      عن البداية: {mhDelta >= 0 ? `+${mhDelta}` : mhDelta} نفسية ·{" "}
+                      {riskDelta > 0 ? `+${riskDelta}%` : `${riskDelta}%`} خطر درجات
                     </span>
                   )}
                 </div>
 
                 <h2 className="archetype-title">
-                  {sim?.archetype?.title || "Checking your routine..."}
+                  {sim?.archetype?.title || "بنحسب النتيجة..."}
                 </h2>
                 <p className="archetype-tagline">
-                  {sim?.archetype?.tagline || "Running live predictions on your habits."}
+                  {sim?.archetype?.tagline || "ثواني وهنطلعلك وضعك."}
                 </p>
 
                 <div className="meter-strip">
                   <div className="meter-block">
                     <div className="meter-top">
-                      <span>Mental well-being</span>
+                      <span>نفسيتك المتوقعة</span>
                       <strong className="tabular-readout">{mhScore.toFixed(1)} / 10</strong>
                     </div>
                     <div className="meter-track">
@@ -633,12 +638,12 @@ export default function App() {
                         style={{ width: `${Math.min(100, Math.max(6, mhScore * 10))}%` }}
                       />
                     </div>
-                    <span className="meter-hint">Predicted mood &amp; stress score (1–10)</span>
+                    <span className="meter-hint">مؤشر المزاج والهدوء من 10</span>
                   </div>
 
                   <div className="meter-block">
                     <div className="meter-top">
-                      <span>Grade impact risk</span>
+                      <span>احتمال الدرجات تتأثر</span>
                       <strong className="tabular-readout">{riskPct}%</strong>
                     </div>
                     <div className="meter-track">
@@ -647,7 +652,7 @@ export default function App() {
                         style={{ width: `${Math.max(5, riskPct)}%` }}
                       />
                     </div>
-                    <span className="meter-hint">Likelihood screen habits hurt studies</span>
+                    <span className="meter-hint">احتمال إن الموبايل يضر مذاكرتك</span>
                   </div>
                 </div>
               </div>
@@ -672,39 +677,39 @@ export default function App() {
 
           <div className="insight-split">
             <div className="panel insight-panel">
-              <h2 className="section-title">Smallest shift that works</h2>
+              <h2 className="section-title">أقل تعديل يظبط الدنيا</h2>
               <p className="panel-subnote">
-                Calculated by testing smaller daily tweaks until your profile enters the Balanced zone.
+                ده أصغر تغيير في يومك يخرجك من الضغط ويدخلك منطقة التوازن.
               </p>
               {sim?.minimum_fix ? (
                 <div className="fix-content">
                   <p className="fix-summary">{sim.minimum_fix.summary}</p>
                   <div className="fix-projection">
                     <span>
-                      Well-being jumps to{" "}
+                      نفسيتك هتوصل لـ{" "}
                       <strong>{sim.minimum_fix.projected_mental_health.toFixed(1)} / 10</strong> (+
                       {sim.minimum_fix.mental_health_gain.toFixed(1)})
                     </span>
                     <span>
-                      Grade risk drops to{" "}
+                      وخطر الدرجات هينزل لـ{" "}
                       <strong>{Math.round(sim.minimum_fix.projected_risk_prob * 100)}%</strong>
                     </span>
                   </div>
                   <button type="button" className="primary-btn" onClick={tryMinimumFix}>
-                    Apply smallest fix
+                    جرّب الروتين ده
                   </button>
                 </div>
               ) : (
                 <p className="fix-balanced-note">
-                  You are already in the Balanced zone with low grade risk. Keep protecting your sleep window.
+                  أنت فعلًا في منطقة التوازن والخطر على درجاتك قليل. خليك محافظ على ميعاد نومك.
                 </p>
               )}
             </div>
 
             <div className="panel insight-panel">
-              <h2 className="section-title">Habit traps from the 705-student study</h2>
+              <h2 className="section-title">فخاخ العادات من بيانات الطلبة</h2>
               <p className="panel-subnote">
-                Risk patterns discovered in the real student dataset — red means active in your routine.
+                أنماط حقيقية لقيناها في بيانات الـ 705 طالب — الأحمر يعني شغال في روتينك دلوقتي.
               </p>
               <ul className="rule-list">
                 {(sim?.triggered_rules || []).map((rule) => (
@@ -714,7 +719,7 @@ export default function App() {
                       <div className="rule-title-row">
                         <strong>{rule.title}</strong>
                         <span className="rule-state">
-                          {rule.status === "active" ? "Active trap" : "Cleared"}
+                          {rule.status === "active" ? "شغال عندك" : "في الأمان"}
                         </span>
                       </div>
                       <p className="rule-evidence">{rule.evidence}</p>
@@ -727,7 +732,7 @@ export default function App() {
 
           {cohort.model_stats && (
             <footer className="model-footnote">
-              Live ML engine trained on 705 students — Ridge well-being (R² {cohort.model_stats.ridge_r2}), XGBoost grade risk (F1 {cohort.model_stats.xgb_f1}), and 3-group K-Means (silhouette {cohort.model_stats.kmeans_silhouette}).
+              متدرب على 705 طالب حقيقي — Ridge للنفسية (R² {cohort.model_stats.ridge_r2})، وXGBoost للدرجات (F1 {cohort.model_stats.xgb_f1})، وK-Means للتقسيم (silhouette {cohort.model_stats.kmeans_silhouette}).
             </footer>
           )}
         </section>

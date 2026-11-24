@@ -15,28 +15,28 @@ export default function LandingScreen({ onStartQuiz, onSkipToBoard }) {
           </div>
 
           <h1 className="landing-title">
-            Is your screen time quietly burning you out?
+            الموبايل ساحب يومك ولا لسه ماسك نفسك؟
           </h1>
 
           <p className="landing-desc">
-            Answer 5 quick questions about your phone and sleep habits. We compare you against{" "}
-            <strong>705 real students</strong> using machine learning to reveal your burnout
-            archetype, closest real-world twin, and the smallest fix that works.
+            جاوب على 5 أسئلة سريعة عن وقت الموبايل ونومك. بنقارن يومك بـ{" "}
+            <strong>705 طالب حقيقي</strong>، ونقولك وضعك فين، ومين أكتر طالب شبهك في البيانات،
+            وإيه أقل تعديل يظبط نومك ودرجاتك.
           </p>
 
           <div className="landing-cta-row">
             <button type="button" className="landing-primary-btn" onClick={onStartQuiz}>
-              Start my 15-sec check
+              اعمل الاختبار في 15 ثانية
             </button>
             <button type="button" className="landing-secondary-btn" onClick={onSkipToBoard}>
-              Skip to interactive board
+              ادخل على البورد على طول
             </button>
           </div>
 
           <div className="landing-meta">
-            <span>705 real students</span>
-            <span>5 quick questions</span>
-            <span>Live detox simulator</span>
+            <span>705 طالب حقيقي</span>
+            <span>5 أسئلة سريعة</span>
+            <span>جرّب التعديل بنفسك</span>
           </div>
         </main>
       </div>
