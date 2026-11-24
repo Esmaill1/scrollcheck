@@ -5,6 +5,7 @@
 Interactive **What-If Digital Detox & Burnout Simulator** plus end-to-end machine learning notebook built on survey data from **705 students**.
 
 ## What Is Included
+- **`TEAM_GUIDE.md`** — Full technical walkthrough for teammates (data cleaning, IQR outliers, ML models & metrics, FastAPI + React core architecture, presentation split, and Q&A cheat sheet).
 - **`Student_ScreenTime_Burnout_ML.ipynb`** — Complete Colab-ready & local ML notebook covering data cleaning, IQR outlier handling, feature engineering, **K-Means** lifestyle personas, **Apriori** habit risk rules, **Ridge Regression** (`R² = 0.8013`), and **XGBoost** (`F1 = 0.9945`).
 - **`scrollcheck/`** — Full-stack web application (**FastAPI** + **React/Vite**):
   - Drag sliders for daily social media time, nightly sleep, and social tension to watch your predicted mental well-being (`1–10`) and academic risk `%` update live.
