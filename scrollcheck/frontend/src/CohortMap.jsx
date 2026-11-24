@@ -1,23 +1,38 @@
 import { useMemo, useState } from "react";
 
 const PERSONA_COLORS = {
-  Balanced: "#1B7F5C",
-  "Moderate Risk": "#C87A19",
-  "High Burnout Risk": "#C93B4B",
+  Balanced: "#10B981",
+  "Moderate Risk": "#F59E0B",
+  "High Burnout Risk": "#FF5C7A",
 };
 
+const FILTER_OPTIONS = [
+  { id: "all", label: "All 705" },
+  { id: "TikTok", label: "TikTok" },
+  { id: "Instagram", label: "Instagram" },
+  { id: "Undergrad", label: "Undergrads" },
+];
+
 const WIDTH = 760;
-const HEIGHT = 360;
-const PAD = { top: 28, right: 28, bottom: 38, left: 28 };
+const HEIGHT = 340;
+const PAD = { top: 30, right: 28, bottom: 38, left: 28 };
 
 export default function CohortMap({
   students,
   centroids,
   userPoint,
-  userPersona,
   baselinePoint,
+  nearestTwin,
 }) {
   const [hovered, setHovered] = useState(null);
+  const [filter, setFilter] = useState("all");
+
+  const visibleStudents = useMemo(() => {
+    if (filter === "TikTok") return students.filter((s) => s.platform === "TikTok");
+    if (filter === "Instagram") return students.filter((s) => s.platform === "Instagram");
+    if (filter === "Undergrad") return students.filter((s) => s.academic_level === "Undergraduate");
+    return students;
+  }, [students, filter]);
 
   const bounds = useMemo(() => {
     if (!students.length) {
@@ -34,27 +49,23 @@ export default function CohortMap({
       if (s.y < minY) minY = s.y;
       if (s.y > maxY) maxY = s.y;
     }
-    if (userPoint) {
-      minX = Math.min(minX, userPoint.x);
-      maxX = Math.max(maxX, userPoint.x);
-      minY = Math.min(minY, userPoint.y);
-      maxY = Math.max(maxY, userPoint.y);
-    }
-    if (baselinePoint) {
-      minX = Math.min(minX, baselinePoint.x);
-      maxX = Math.max(maxX, baselinePoint.x);
-      minY = Math.min(minY, baselinePoint.y);
-      maxY = Math.max(maxY, baselinePoint.y);
+    for (const pt of [userPoint, baselinePoint, nearestTwin]) {
+      if (pt) {
+        minX = Math.min(minX, pt.x);
+        maxX = Math.max(maxX, pt.x);
+        minY = Math.min(minY, pt.y);
+        maxY = Math.max(maxY, pt.y);
+      }
     }
     const padX = (maxX - minX) * 0.09 || 1;
-    const padY = (maxY - minY) * 0.12 || 1;
+    const padY = (maxY - minY) * 0.13 || 1;
     return {
       minX: minX - padX,
       maxX: maxX + padX,
       minY: minY - padY,
       maxY: maxY + padY,
     };
-  }, [students, userPoint, baselinePoint]);
+  }, [students, userPoint, baselinePoint, nearestTwin]);
 
   const toPx = (x, y) => {
     const plotW = WIDTH - PAD.left - PAD.right;
@@ -66,34 +77,30 @@ export default function CohortMap({
 
   const userPx = userPoint ? toPx(userPoint.x, userPoint.y) : null;
   const basePx = baselinePoint ? toPx(baselinePoint.x, baselinePoint.y) : null;
+  const twinPx = nearestTwin ? toPx(nearestTwin.x, nearestTwin.y) : null;
   const originPx = toPx(0, 0);
 
   return (
-    <div className="cohort-map-wrap">
+    <div className="panel cohort-map-panel">
       <div className="cohort-map-header">
         <div>
-          <h2 className="section-title">Where your routine sits among 705 students</h2>
+          <h2 className="section-title">Live 705-student galaxy</h2>
           <p className="section-caption">
-            Hover any dot to inspect a real student profile. Drag the sliders to watch your marker move.
+            Slice the crowd, hover any student dot, or follow your glowing beacon and data twin.
           </p>
         </div>
-        <div className="map-legend" aria-label="Student groups">
-          <span className="legend-item">
-            <span className="legend-dot" style={{ background: PERSONA_COLORS.Balanced }} />
-            Balanced
-          </span>
-          <span className="legend-item">
-            <span className="legend-dot" style={{ background: PERSONA_COLORS["Moderate Risk"] }} />
-            Moderate risk
-          </span>
-          <span className="legend-item">
-            <span className="legend-dot" style={{ background: PERSONA_COLORS["High Burnout Risk"] }} />
-            High burnout risk
-          </span>
-          <span className="legend-item">
-            <span className="legend-dot legend-dot-you" />
-            You
-          </span>
+
+        <div className="map-filter-strip" role="group" aria-label="Filter cohort">
+          {FILTER_OPTIONS.map((opt) => (
+            <button
+              key={opt.id}
+              type="button"
+              className={`map-filter-btn ${filter === opt.id ? "is-active" : ""}`}
+              onClick={() => setFilter(opt.id)}
+            >
+              {opt.label}
+            </button>
+          ))}
         </div>
       </div>
 
@@ -102,7 +109,7 @@ export default function CohortMap({
           viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
           className="cohort-svg"
           role="img"
-          aria-label="Scatter map of 705 students grouped by screen time, sleep, conflicts, and mental well-being"
+          aria-label="Interactive scatter map of 705 students grouped by screen time, sleep, and mental well-being"
         >
           <defs>
             <marker
@@ -114,44 +121,45 @@ export default function CohortMap({
               markerHeight="6"
               orient="auto-start-reverse"
             >
-              <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#2557D6" />
+              <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="var(--accent-primary)" />
             </marker>
           </defs>
 
-          {/* Subtle structural crosshairs */}
+          {/* Hairline crosshairs */}
           <line
             x1={PAD.left}
             y1={originPx.py}
             x2={WIDTH - PAD.right}
             y2={originPx.py}
-            stroke="#DCE4EE"
+            stroke="var(--map-grid)"
             strokeWidth="1"
-            strokeDasharray="3 4"
+            strokeDasharray="3 5"
           />
           <line
             x1={originPx.px}
             y1={PAD.top}
             x2={originPx.px}
             y2={HEIGHT - PAD.bottom}
-            stroke="#DCE4EE"
+            stroke="var(--map-grid)"
             strokeWidth="1"
-            strokeDasharray="3 4"
+            strokeDasharray="3 5"
           />
 
-          {/* 705 Real Students */}
-          {students.map((s) => {
+          {/* Real student dots */}
+          {visibleStudents.map((s) => {
             const { px, py } = toPx(s.x, s.y);
             const isHovered = hovered && hovered.id === s.id;
+            const isTwin = nearestTwin && nearestTwin.id === s.id;
             return (
               <circle
                 key={s.id}
                 cx={px}
                 cy={py}
-                r={isHovered ? 6 : 3.2}
-                fill={PERSONA_COLORS[s.persona] || "#52627A"}
-                fillOpacity={isHovered ? 0.95 : 0.42}
-                stroke={isHovered ? "#142033" : "none"}
-                strokeWidth={isHovered ? 1.8 : 0}
+                r={isHovered ? 6.5 : isTwin ? 5.5 : 3.3}
+                fill={PERSONA_COLORS[s.persona] || "#94A3B8"}
+                fillOpacity={isHovered || isTwin ? 0.96 : 0.48}
+                stroke={isHovered ? "var(--ink-primary)" : isTwin ? "var(--twin-accent)" : "none"}
+                strokeWidth={isHovered ? 2 : isTwin ? 2.2 : 0}
                 className="student-dot"
                 onMouseEnter={() => setHovered(s)}
                 onMouseLeave={() => setHovered(null)}
@@ -159,38 +167,38 @@ export default function CohortMap({
             );
           })}
 
-          {/* Soft cluster centroid labels */}
+          {/* Cluster labels */}
           {centroids.map((c) => {
             const { px, py } = toPx(c.x, c.y);
-            const color = PERSONA_COLORS[c.persona] || "#142033";
+            const color = PERSONA_COLORS[c.persona] || "var(--ink-primary)";
             const labelText =
               c.persona === "High Burnout Risk"
-                ? `High burnout (${c.count})`
+                ? `Burnout (${c.count})`
                 : c.persona === "Moderate Risk"
                 ? `Moderate (${c.count})`
                 : `Balanced (${c.count})`;
             return (
               <g key={c.persona} transform={`translate(${px}, ${py - 18})`} pointerEvents="none">
                 <rect
-                  x="-54"
-                  y="-12"
-                  width="108"
+                  x="-50"
+                  y="-11"
+                  width="100"
                   height="20"
                   rx="10"
-                  fill="#FAFBFD"
-                  fillOpacity="0.9"
+                  fill="var(--surface-elevated)"
+                  fillOpacity="0.92"
                   stroke={color}
-                  strokeOpacity="0.4"
-                  strokeWidth="1"
+                  strokeOpacity="0.55"
+                  strokeWidth="1.2"
                 />
                 <text
                   x="0"
-                  y="1.5"
+                  y="2.5"
                   textAnchor="middle"
                   fontSize="10.5"
-                  fontWeight="600"
+                  fontWeight="700"
                   fill={color}
-                  fontFamily="Plus Jakarta Sans, sans-serif"
+                  fontFamily="Space Grotesk, sans-serif"
                 >
                   {labelText}
                 </text>
@@ -198,16 +206,40 @@ export default function CohortMap({
             );
           })}
 
-          {/* Baseline Pin + Trajectory Line */}
-          {basePx && userPx && (Math.hypot(userPx.px - basePx.px, userPx.py - basePx.py) > 6) && (
+          {/* Link from You -> Nearest Twin */}
+          {twinPx && userPx && (
+            <g pointerEvents="none">
+              <line
+                x1={userPx.px}
+                y1={userPx.py}
+                x2={twinPx.px}
+                y2={twinPx.py}
+                stroke="var(--twin-accent)"
+                strokeWidth="1.5"
+                strokeDasharray="3 3"
+                strokeOpacity="0.8"
+              />
+              <circle
+                cx={twinPx.px}
+                cy={twinPx.py}
+                r="8.5"
+                fill="none"
+                stroke="var(--twin-accent)"
+                strokeWidth="2"
+              />
+            </g>
+          )}
+
+          {/* Start -> You trajectory */}
+          {basePx && userPx && Math.hypot(userPx.px - basePx.px, userPx.py - basePx.py) > 6 && (
             <g pointerEvents="none">
               <line
                 x1={basePx.px}
                 y1={basePx.py}
                 x2={userPx.px}
                 y2={userPx.py}
-                stroke="#2557D6"
-                strokeWidth="2"
+                stroke="var(--accent-primary)"
+                strokeWidth="2.4"
                 strokeDasharray="5 4"
                 markerEnd="url(#trajectory-arrow)"
               />
@@ -215,8 +247,8 @@ export default function CohortMap({
                 cx={basePx.px}
                 cy={basePx.py}
                 r="7"
-                fill="#FAFBFD"
-                stroke="#52627A"
+                fill="var(--surface-elevated)"
+                stroke="var(--ink-secondary)"
                 strokeWidth="2"
                 strokeDasharray="2 2"
               />
@@ -225,9 +257,9 @@ export default function CohortMap({
                 y={basePx.py + 19}
                 textAnchor="middle"
                 fontSize="10.5"
-                fontWeight="600"
-                fill="#52627A"
-                fontFamily="Plus Jakarta Sans, sans-serif"
+                fontWeight="700"
+                fill="var(--ink-secondary)"
+                fontFamily="Space Grotesk, sans-serif"
               >
                 Start
               </text>
@@ -241,66 +273,64 @@ export default function CohortMap({
               style={{ transform: `translate(${userPx.px}px, ${userPx.py}px)` }}
               pointerEvents="none"
             >
-              <circle r="15" fill="#2557D6" fillOpacity="0.16" className="beacon-halo" />
+              <circle r="17" fill="var(--accent-primary)" fillOpacity="0.22" className="beacon-halo" />
               <circle
-                r="7.5"
-                fill="#2557D6"
-                stroke="#FAFBFD"
+                r="8"
+                fill="var(--accent-primary)"
+                stroke="#FFFFFF"
                 strokeWidth="2.5"
               />
               <rect
-                x="-19"
-                y="-28"
-                width="38"
+                x="-20"
+                y="-30"
+                width="40"
                 height="18"
                 rx="9"
-                fill="#142033"
+                fill="var(--ink-primary)"
               />
               <text
                 x="0"
-                y="-15.5"
+                y="-17.5"
                 textAnchor="middle"
                 fontSize="10.5"
                 fontWeight="700"
-                fill="#FAFBFD"
-                fontFamily="Instrument Sans, sans-serif"
+                fill="var(--bg-canvas)"
+                fontFamily="Bricolage Grotesque, sans-serif"
               >
                 You
               </text>
             </g>
           )}
 
-          {/* Axis direction hints */}
           <text
             x={PAD.left}
             y={HEIGHT - 10}
             textAnchor="start"
             fontSize="11"
-            fill="#52627A"
-            fontFamily="Plus Jakarta Sans, sans-serif"
+            fill="var(--ink-secondary)"
+            fontFamily="Space Grotesk, sans-serif"
           >
-            More rested and balanced
+            Rested &amp; balanced
           </text>
           <text
             x={WIDTH - PAD.right}
             y={HEIGHT - 10}
             textAnchor="end"
             fontSize="11"
-            fill="#52627A"
-            fontFamily="Plus Jakarta Sans, sans-serif"
+            fill="var(--ink-secondary)"
+            fontFamily="Space Grotesk, sans-serif"
           >
-            Higher screen and conflict strain
+            Heavy scrolling &amp; tension
           </text>
         </svg>
 
         {hovered && (
           <div className="student-tooltip" role="status">
             <div className="tooltip-top">
-              <strong>Student #{hovered.id}</strong>
-              <span
-                className="tooltip-tag"
-                style={{ color: PERSONA_COLORS[hovered.persona] }}
-              >
+              <strong>
+                Student #{hovered.id} ({hovered.age}y, {hovered.country})
+              </strong>
+              <span className="tooltip-tag" style={{ color: PERSONA_COLORS[hovered.persona] }}>
                 {hovered.persona}
               </span>
             </div>
@@ -315,6 +345,22 @@ export default function CohortMap({
           </div>
         )}
       </div>
+
+      {/* Real-world Data Twin strip */}
+      {nearestTwin && (
+        <div className="twin-strip">
+          <div className="twin-badge">
+            <span className="tabular-readout">{nearestTwin.similarity_pct}%</span> match
+          </div>
+          <p className="twin-copy">
+            <strong>Your real-world data twin:</strong> Student #{nearestTwin.id} ({nearestTwin.age}y{" "}
+            {nearestTwin.academic_level} in {nearestTwin.country}) — uses{" "}
+            <strong>{nearestTwin.platform}</strong> for {nearestTwin.usage_hours}h/day, sleeps{" "}
+            {nearestTwin.sleep_hours}h, well-being {nearestTwin.mental_health}/10, grades hurt:{" "}
+            <strong>{nearestTwin.academics_affected}</strong>.
+          </p>
+        </div>
+      )}
     </div>
   );
 }

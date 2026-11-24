@@ -41,6 +41,7 @@ def _locate_csv() -> Path:
 # ---------------------------------------------------------------------------
 df_raw = pd.read_csv(_locate_csv())
 df = df_raw.drop(columns=["Student_ID", "Country"]).copy()
+df["Country_Label"] = df_raw["Country"].fillna("Unknown")
 
 for col in ["Avg_Daily_Usage_Hours", "Conflicts_Over_Social_Media"]:
     if df[col].isnull().any():
@@ -62,7 +63,7 @@ df["Academic_Level_Ord"] = df["Academic_Level"].map(LEVEL_MAP)
 
 categorical_cols = ["Gender", "Most_Used_Platform", "Relationship_Status"]
 df_encoded = pd.get_dummies(
-    df.drop(columns=["Academic_Level", "Affects_Academic_Performance"]),
+    df.drop(columns=["Academic_Level", "Affects_Academic_Performance", "Country_Label"]),
     columns=categorical_cols,
     drop_first=True,
     dtype=int,
@@ -141,6 +142,7 @@ COHORT_STUDENTS = [
         "y": round(float(row["pca_y"]), 4),
         "persona": row["Persona"],
         "age": int(row["Age"]),
+        "country": row["Country_Label"],
         "platform": row["Most_Used_Platform"],
         "academic_level": row["Academic_Level"],
         "usage_hours": round(float(row["Avg_Daily_Usage_Hours"]), 2),
@@ -224,6 +226,45 @@ def _evaluate_profile(
             "x": round(float(coords[0] * pca_x_sign), 4),
             "y": round(float(coords[1]), 4),
         },
+        "_persona_vec": persona_vec[0],
+    }
+
+
+def _build_archetype(persona: str, usage: float, sleep: float, conflicts: int) -> dict:
+    if persona == "High Burnout Risk":
+        if sleep < 6.0:
+            return {
+                "title": "The 2 AM Doomscroller",
+                "tagline": "Your feed is eating your REM cycle — and tomorrow's focus.",
+                "theme": "burnout",
+            }
+        if conflicts >= 4:
+            return {
+                "title": "The Notification Magnet",
+                "tagline": "Constant online tension plus heavy scrolling is draining your battery.",
+                "theme": "burnout",
+            }
+        return {
+            "title": "The Endless Feed Rider",
+            "tagline": "High daily screen time has pushed your routine into the red zone.",
+            "theme": "burnout",
+        }
+    if persona == "Moderate Risk":
+        return {
+            "title": "The Overcaffeinated Crammer",
+            "tagline": "Running on borderline sleep and mid-day scrolls — one good week flips this.",
+            "theme": "moderate",
+        }
+    if sleep >= 7.5 and usage <= 3.5:
+        return {
+            "title": "The Rested Main Character",
+            "tagline": "Protected sleep and controlled screen time keep your brain sharp.",
+            "theme": "balanced",
+        }
+    return {
+        "title": "The Steady Navigator",
+        "tagline": "Healthy balance overall — keep guarding your sleep window.",
+        "theme": "balanced",
     }
 
 
@@ -326,6 +367,31 @@ def simulate(req: SimulateRequest):
         req.gender,
         req.relationship_status,
     )
+    persona_vec = current.pop("_persona_vec")
+
+    # Nearest real student twin in standardized persona space
+    dists = np.linalg.norm(X_persona_sc - persona_vec, axis=1)
+    twin_idx = int(np.argmin(dists))
+    twin_dist = float(dists[twin_idx])
+    similarity_pct = int(round(max(55.0, min(99.0, 100.0 * np.exp(-twin_dist / 2.2)))))
+    nearest_twin = {
+        **COHORT_STUDENTS[twin_idx],
+        "similarity_pct": similarity_pct,
+    }
+
+    archetype = _build_archetype(
+        current["persona"],
+        req.daily_usage_hours,
+        req.sleep_hours,
+        req.conflicts,
+    )
+
+    semester_impact = {
+        "days_per_year_scrolling": round(req.daily_usage_hours * 365.0 / 24.0, 1),
+        "semester_scroll_hours": int(round(req.daily_usage_hours * 112.0)),
+        "semester_sleep_debt_hours": int(round(max(0.0, 8.0 - req.sleep_hours) * 112.0)),
+        "free_hours_daily": round(max(0.0, 24.0 - req.daily_usage_hours - req.sleep_hours), 1),
+    }
 
     triggered_rules = [
         {
@@ -352,6 +418,9 @@ def simulate(req: SimulateRequest):
 
     return {
         **current,
+        "archetype": archetype,
+        "nearest_twin": nearest_twin,
+        "semester_impact": semester_impact,
         "triggered_rules": triggered_rules,
         "minimum_fix": minimum_fix,
     }
