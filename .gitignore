@@ -1,0 +1,8 @@
+node_modules/
+scrollcheck/frontend/node_modules/
+scrollcheck/frontend/dist/
+__pycache__/
+*.pyc
+.vercel/
+.env
+.env.*
