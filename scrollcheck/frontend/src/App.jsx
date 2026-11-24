@@ -2,12 +2,13 @@ import { useEffect, useMemo, useState } from "react";
 import BrainBattery from "./BrainBattery.jsx";
 import CohortMap from "./CohortMap.jsx";
 import DayRing from "./DayRing.jsx";
-import QuickQuizModal from "./QuickQuizModal.jsx";
+import LandingScreen from "./LandingScreen.jsx";
+import QuestionFlow from "./QuestionFlow.jsx";
 
 const PRESETS = [
   {
     id: "tiktok_spiral",
-    label: "2 AM TikTok spiral",
+    label: "2 AM TikTok",
     values: {
       age: 19,
       daily_usage_hours: 6.8,
@@ -21,7 +22,7 @@ const PRESETS = [
   },
   {
     id: "exam_zombie",
-    label: "Exam-week zombie",
+    label: "Exam week",
     values: {
       age: 20,
       daily_usage_hours: 5.1,
@@ -100,6 +101,7 @@ function clamp(val, min, max) {
 }
 
 export default function App() {
+  const [stage, setStage] = useState("landing"); // "landing" | "questions" | "analyzing" | "board"
   const [baseForm, setBaseForm] = useState(PRESETS[0].values);
   const [activePowerUps, setActivePowerUps] = useState([]);
   const [cohort, setCohort] = useState({
@@ -109,14 +111,11 @@ export default function App() {
     platforms: DEFAULT_PLATFORMS,
   });
   const [sim, setSim] = useState(null);
-  const [baseline, setBaseline] = useState(null); // { baseForm, activePowerUps, result }
-  const [showIntro, setShowIntro] = useState(true);
-  const [profileSource, setProfileSource] = useState("Sample: 2 AM TikTok spiral");
-  const [quizOpen, setQuizOpen] = useState(false);
+  const [baseline, setBaseline] = useState(null);
+  const [profileSource, setProfileSource] = useState("Sample: 2 AM TikTok");
   const [copied, setCopied] = useState(false);
   const [apiError, setApiError] = useState(null);
 
-  // Derive effective routine = base sliders + active detox power-ups
   const effectiveForm = useMemo(() => {
     let usage = baseForm.daily_usage_hours;
     let sleep = baseForm.sleep_hours;
@@ -139,7 +138,7 @@ export default function App() {
     };
   }, [baseForm, activePowerUps]);
 
-  // Load 705-student cohort once
+  // Preload 705-student cohort immediately
   useEffect(() => {
     let active = true;
     fetch("/api/cohort")
@@ -158,8 +157,9 @@ export default function App() {
     };
   }, []);
 
-  // Re-simulate live on every routine change
+  // Live simulation whenever on the interactive board
   useEffect(() => {
+    if (stage !== "board") return;
     let active = true;
     const timer = setTimeout(() => {
       fetch("/api/simulate", {
@@ -186,7 +186,39 @@ export default function App() {
       active = false;
       clearTimeout(timer);
     };
-  }, [effectiveForm]);
+  }, [effectiveForm, stage]);
+
+  const handleQuizComplete = async (answers) => {
+    setStage("analyzing");
+    setActivePowerUps([]);
+    setBaseForm(answers);
+    setProfileSource("Your quiz result");
+
+    const startedAt = Date.now();
+    try {
+      const res = await fetch("/api/simulate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(answers),
+      });
+      if (!res.ok) throw new Error(`Simulation failed (${res.status})`);
+      const data = await res.json();
+
+      // Brief smooth transition beat so the reveal feels intentional
+      const elapsed = Date.now() - startedAt;
+      if (elapsed < 480) {
+        await new Promise((r) => setTimeout(r, 480 - elapsed));
+      }
+
+      setSim(data);
+      setBaseline({ baseForm: { ...answers }, activePowerUps: [], result: data });
+      setApiError(null);
+      setStage("board");
+    } catch (err) {
+      setApiError(err.message);
+      setStage("board");
+    }
+  };
 
   const updateBaseField = (key, value) => {
     setProfileSource("Your custom routine");
@@ -236,15 +268,6 @@ export default function App() {
     }));
   };
 
-  const handleQuizComplete = (answers) => {
-    setQuizOpen(false);
-    setShowIntro(false);
-    setBaseline(null);
-    setActivePowerUps([]);
-    setProfileSource("Your quiz routine");
-    setBaseForm((prev) => ({ ...prev, ...answers }));
-  };
-
   const copyWrappedSummary = () => {
     if (!sim) return;
     const summary = [
@@ -259,6 +282,47 @@ export default function App() {
     });
   };
 
+  // Stage 1: Full-screen welcome
+  if (stage === "landing") {
+    return (
+      <LandingScreen
+        onStartQuiz={() => setStage("questions")}
+        onSkipToBoard={() => {
+          setBaseline(null);
+          setActivePowerUps([]);
+          setProfileSource(`Sample: ${PRESETS[0].label}`);
+          setBaseForm(PRESETS[0].values);
+          setStage("board");
+        }}
+      />
+    );
+  }
+
+  // Stage 2: Full-screen one-by-one questions
+  if (stage === "questions") {
+    return (
+      <QuestionFlow
+        initialValues={baseForm}
+        onExit={() => setStage("landing")}
+        onComplete={handleQuizComplete}
+      />
+    );
+  }
+
+  // Brief analyzing beat between Question 5 and Result Board
+  if (stage === "analyzing") {
+    return (
+      <div className="app-shell analyzing-shell" data-theme="burnout">
+        <div className="analyzing-card">
+          <div className="analyzing-spinner" aria-hidden="true" />
+          <h2>Comparing your habits against 705 real students...</h2>
+          <p>Matching your data twin, calculating grade risk, and finding your smallest detox fix.</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Stage 3: Result + Interactive What-If Board
   const persona = sim?.persona || "High Burnout Risk";
   const themeKey =
     sim?.archetype?.theme ||
@@ -279,21 +343,19 @@ export default function App() {
   return (
     <div className="app-shell" data-theme={themeKey}>
       <header className="topbar">
-        <div className="brand-block">
+        <button type="button" className="brand-home-btn" onClick={() => setStage("landing")}>
           <div className="brand-badge" aria-hidden="true">
             <span />
           </div>
-          <div>
+          <div className="brand-text-left">
             <h1 className="brand-name">ScrollCheck</h1>
-            <p className="brand-subtitle">
-              What-if detox playground powered by 705 real students
-            </p>
+            <p className="brand-subtitle">Your result &amp; interactive detox board</p>
           </div>
-        </div>
+        </button>
 
         <div className="topbar-actions">
-          <button type="button" className="vibe-check-btn" onClick={() => setQuizOpen(true)}>
-            15-sec vibe check
+          <button type="button" className="vibe-check-btn" onClick={() => setStage("questions")}>
+            Retake quiz
           </button>
 
           <div className="preset-strip" role="group" aria-label="Sample routines">
@@ -327,52 +389,6 @@ export default function App() {
         <div className="error-banner" role="alert">
           Model service offline ({apiError}). Make sure FastAPI is running on port 8000.
         </div>
-      )}
-
-      {showIntro && (
-        <section className="panel welcome-banner" aria-label="How ScrollCheck works">
-          <div className="welcome-main">
-            <div>
-              <h2 className="welcome-title">
-                Wondering if your scrolling is hurting your sleep or grades?
-              </h2>
-              <p className="welcome-desc">
-                ScrollCheck compares your daily phone and sleep routine against <strong>705 real students</strong> using machine learning to estimate your burnout risk, match your closest data twin, and find the easiest detox fix.
-              </p>
-            </div>
-            <div className="welcome-actions">
-              <button
-                type="button"
-                className="vibe-check-btn"
-                onClick={() => setQuizOpen(true)}
-              >
-                Check my own habits (15 sec)
-              </button>
-              <button
-                type="button"
-                className="ghost-btn"
-                onClick={() => setShowIntro(false)}
-              >
-                Explore sample profile
-              </button>
-            </div>
-          </div>
-
-          <div className="welcome-steps">
-            <div className="welcome-step">
-              <strong>1. Set your routine</strong>
-              <span>Take the 15-sec quiz or adjust the sliders on the left.</span>
-            </div>
-            <div className="welcome-step">
-              <strong>2. Read your snapshot</strong>
-              <span>See your Brain Battery, grade risk, and place among 705 students.</span>
-            </div>
-            <div className="welcome-step">
-              <strong>3. Try a detox</strong>
-              <span>Toggle power-ups or apply the smallest fix to reach Balanced.</span>
-            </div>
-          </div>
-        </section>
       )}
 
       <main className="workspace">
@@ -428,7 +444,6 @@ export default function App() {
             </div>
           </div>
 
-          {/* Sliders (show effective value after power-ups) */}
           <div className="control-group">
             <div className="control-label-row">
               <label htmlFor="usage-slider">Daily scrolling</label>
@@ -583,9 +598,8 @@ export default function App() {
           </div>
         </aside>
 
-        {/* RIGHT HERO STAGE + COHORT GALAXY */}
+        {/* RIGHT RESULT HERO + COHORT BOARD */}
         <section className="canvas-column">
-          {/* Expressive Hero Archetype Stage */}
           <div className="panel hero-stage">
             <div className="hero-left">
               <BrainBattery score={mhScore} persona={persona} />
@@ -650,7 +664,6 @@ export default function App() {
             />
           </div>
 
-          {/* 705-Student Galaxy + Real-World Twin */}
           <CohortMap
             students={cohort.students}
             centroids={cohort.centroids}
@@ -659,7 +672,6 @@ export default function App() {
             nearestTwin={sim?.nearest_twin || null}
           />
 
-          {/* Bottom Action Split */}
           <div className="insight-split">
             <div className="panel insight-panel">
               <h2 className="section-title">Smallest shift that works</h2>
@@ -722,12 +734,6 @@ export default function App() {
           )}
         </section>
       </main>
-
-      <QuickQuizModal
-        isOpen={quizOpen}
-        onClose={() => setQuizOpen(false)}
-        onComplete={handleQuizComplete}
-      />
     </div>
   );
 }
