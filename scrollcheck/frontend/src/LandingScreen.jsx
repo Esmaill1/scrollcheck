@@ -1,21 +1,54 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import BrainBattery from "./BrainBattery.jsx";
 import BrandLogo from "./BrandLogo.jsx";
 
-export default function LandingScreen({ onStartQuiz, onSkipToBoard, onBurst }) {
+export default function LandingScreen({
+  onStartQuiz,
+  onSkipToBoard,
+  onBurst,
+  supercharged = false,
+  onTurboTrigger,
+  unlockedCount = 0,
+  onOpenVault,
+}) {
   const [charged, setCharged] = useState(false);
+  const tapTimesRef = useRef([]);
+  const footerTapTimesRef = useRef([]);
 
   const handleMascotTap = (e) => {
-    const next = !charged;
-    setCharged(next);
+    const now = Date.now();
+    const recent = tapTimesRef.current.filter((t) => now - t < 2500);
+    recent.push(now);
+    tapTimesRef.current = recent;
+
     const rect = e.currentTarget.getBoundingClientRect();
     const x = e.clientX || rect.left + rect.width / 2;
     const y = e.clientY || rect.top + rect.height / 2;
+
+    if (recent.length >= 5) {
+      tapTimesRef.current = [];
+      onTurboTrigger?.(x, y);
+      return;
+    }
+
+    const next = !charged;
+    setCharged(next);
     if (next) {
       onBurst?.({ kind: "spark", x, y });
       onBurst?.({ kind: "float", x, y: y - 14, text: "+طاقة", tone: "positive" });
     } else {
       onBurst?.({ kind: "spark", x, y });
+    }
+  };
+
+  const handleMetaTap = () => {
+    const now = Date.now();
+    const recent = footerTapTimesRef.current.filter((t) => now - t < 1800);
+    recent.push(now);
+    footerTapTimesRef.current = recent;
+    if (recent.length >= 3) {
+      footerTapTimesRef.current = [];
+      onOpenVault?.();
     }
   };
 
@@ -32,6 +65,7 @@ export default function LandingScreen({ onStartQuiz, onSkipToBoard, onBurst }) {
               score={charged ? 8.6 : 5.2}
               persona={charged ? "Balanced" : "Moderate Risk"}
               interactive
+              supercharged={supercharged}
               onTap={handleMascotTap}
             />
           </div>
@@ -55,9 +89,20 @@ export default function LandingScreen({ onStartQuiz, onSkipToBoard, onBurst }) {
         </main>
 
         <footer className="landing-meta stagger-item stagger-5">
-          <span>705 طالب من 110 دولة</span>
+          <button
+            type="button"
+            className="meta-secret-btn"
+            onClick={handleMetaTap}
+          >
+            705 طالب من 110 دولة
+          </button>
           <span>5 أسئلة</span>
           <span>محاكاة فورية</span>
+          {unlockedCount > 0 && (
+            <button type="button" className="egg-pill-btn" onClick={onOpenVault}>
+              أسرار {unlockedCount}/5
+            </button>
+          )}
         </footer>
       </div>
     </div>

@@ -5,8 +5,10 @@ import BrandLogo from "./BrandLogo.jsx";
 import CohortMap from "./CohortMap.jsx";
 import DayRing from "./DayRing.jsx";
 import DopamineBurst from "./DopamineBurst.jsx";
+import EasterEggOverlay from "./EasterEggOverlay.jsx";
 import LandingScreen from "./LandingScreen.jsx";
 import QuestionFlow from "./QuestionFlow.jsx";
+import { EASTER_EGGS, loadUnlockedEggs, saveUnlockedEggs } from "./easterEggs.js";
 import { useAnimatedNumber } from "./useAnimatedNumber.js";
 
 const PRESETS = [
@@ -134,11 +136,23 @@ export default function App() {
   const [bursts, setBursts] = useState([]);
   const [celebratingHero, setCelebratingHero] = useState(false);
   const [justClearedRules, setJustClearedRules] = useState([]);
+  const [unlockedEggs, setUnlockedEggs] = useState(() => loadUnlockedEggs());
+  const [eggToast, setEggToast] = useState(null);
+  const [vaultOpen, setVaultOpen] = useState(false);
+  const [supercharged, setSupercharged] = useState(false);
+  const [nokiaMode, setNokiaMode] = useState(false);
+  const [boardShake, setBoardShake] = useState(false);
 
   const burstSeqRef = useRef(0);
   const burstTimersRef = useRef([]);
   const prevPersonaRef = useRef(null);
   const prevActiveRulesRef = useRef(new Set());
+  const toastTimerRef = useRef(null);
+  const turboTimerRef = useRef(null);
+  const shakeTimerRef = useRef(null);
+  const extremeLockRef = useRef(null);
+  const boardBatteryTapTimesRef = useRef([]);
+  const footnoteTapTimesRef = useRef([]);
 
   const triggerBurst = useCallback((payload) => {
     const id = ++burstSeqRef.current;
@@ -149,11 +163,110 @@ export default function App() {
     burstTimersRef.current.push(timer);
   }, []);
 
+  const unlockEgg = useCallback(
+    (eggId, customMessage = null, burstOpts = null) => {
+      const meta = EASTER_EGGS.find((e) => e.id === eggId);
+      if (!meta) return;
+
+      setUnlockedEggs((prev) => {
+        if (prev.includes(eggId)) return prev;
+        const next = [...prev, eggId];
+        saveUnlockedEggs(next);
+        return next;
+      });
+
+      const cx = typeof window !== "undefined" ? window.innerWidth / 2 : 500;
+      const cy = typeof window !== "undefined" ? Math.min(260, window.innerHeight * 0.28) : 220;
+      triggerBurst(burstOpts || { kind: "confetti", x: cx, y: cy });
+
+      if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+      const toastId = Date.now();
+      setEggToast({ id: toastId, message: customMessage || meta.message });
+      toastTimerRef.current = setTimeout(() => {
+        setEggToast((curr) => (curr?.id === toastId ? null : curr));
+      }, 5200);
+    },
+    [triggerBurst]
+  );
+
+  const handleTurboBattery = useCallback(
+    (x, y) => {
+      setSupercharged(true);
+      if (turboTimerRef.current) clearTimeout(turboTimerRef.current);
+      turboTimerRef.current = setTimeout(() => setSupercharged(false), 5000);
+      unlockEgg("turbo_battery", null, { kind: "confetti", x, y });
+    },
+    [unlockEgg]
+  );
+
+  const activateNokiaMode = useCallback(() => {
+    setNokiaMode(true);
+    setActivePowerUps([]);
+    setProfileSource("وضع نوكيا 3310");
+    setBaseForm((prev) => ({
+      ...prev,
+      daily_usage_hours: 1.5,
+      sleep_hours: 9.0,
+      conflicts: 0,
+    }));
+    setStage((curr) => (curr === "landing" ? "board" : curr));
+    unlockEgg("nokia_mode");
+  }, [unlockEgg]);
+
   useEffect(() => {
     return () => {
       burstTimersRef.current.forEach(clearTimeout);
+      if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+      if (turboTimerRef.current) clearTimeout(turboTimerRef.current);
+      if (shakeTimerRef.current) clearTimeout(shakeTimerRef.current);
     };
   }, []);
+
+  useEffect(() => {
+    let charBuffer = "";
+    const keySeq = [];
+    const KONAMI = [
+      "arrowup",
+      "arrowup",
+      "arrowdown",
+      "arrowdown",
+      "arrowleft",
+      "arrowright",
+      "arrowleft",
+      "arrowright",
+      "b",
+      "a",
+    ];
+
+    const onKeyDown = (e) => {
+      const tag = e.target?.tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || e.target?.isContentEditable) {
+        return;
+      }
+
+      const key = e.key?.toLowerCase();
+      if (!key) return;
+
+      keySeq.push(key);
+      if (keySeq.length > KONAMI.length) keySeq.shift();
+
+      if (key.length === 1 && /[a-z0-9]/.test(key)) {
+        charBuffer = (charBuffer + key).slice(-12);
+      }
+
+      const konamiMatch =
+        keySeq.length === KONAMI.length && KONAMI.every((k, i) => keySeq[i] === k);
+
+      if (charBuffer.endsWith("nokia") || charBuffer.endsWith("detox") || konamiMatch) {
+        charBuffer = "";
+        keySeq.length = 0;
+        activateNokiaMode();
+      }
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [activateNokiaMode]);
 
   const effectiveForm = useMemo(() => {
     let usage = baseForm.daily_usage_hours;
@@ -311,12 +424,41 @@ export default function App() {
     };
   }, [sim, stage, triggerBurst]);
 
+  useEffect(() => {
+    if (stage !== "board") {
+      extremeLockRef.current = null;
+      return;
+    }
+
+    const { daily_usage_hours: usage, sleep_hours: sleep, conflicts } = effectiveForm;
+    if (usage >= 8.8 && sleep <= 4.3) {
+      if (extremeLockRef.current !== "burnout") {
+        extremeLockRef.current = "burnout";
+        setBoardShake(true);
+        if (shakeTimerRef.current) clearTimeout(shakeTimerRef.current);
+        shakeTimerRef.current = setTimeout(() => setBoardShake(false), 320);
+        unlockEgg("extreme_routine", "انزل المس نجيلة شوية يا عم.. عينك بتستغيث");
+      }
+    } else if (usage <= 1.7 && sleep >= 9.0 && conflicts === 0) {
+      if (extremeLockRef.current !== "monk") {
+        extremeLockRef.current = "monk";
+        unlockEgg("extreme_routine", "أنت بتستخدم نوكيا كشاف ولا إيه.. ده مش طالب ده راهب");
+      }
+    } else {
+      extremeLockRef.current = null;
+    }
+  }, [effectiveForm, stage, unlockEgg]);
+
   const togglePowerUp = (id, e) => {
     if (!baseline && sim) {
       setBaseline({ baseForm: { ...baseForm }, activePowerUps: [...activePowerUps], result: sim });
     }
     setProfileSource("روتينك المعدّل");
     const wasOn = activePowerUps.includes(id);
+    const next = wasOn
+      ? activePowerUps.filter((item) => item !== id)
+      : [...activePowerUps, id];
+
     if (!wasOn && e) {
       const p = POWER_UPS.find((item) => item.id === id);
       const rect = e.currentTarget.getBoundingClientRect();
@@ -326,10 +468,52 @@ export default function App() {
       if (p?.rewardTag) {
         triggerBurst({ kind: "float", x, y: y - 12, text: p.rewardTag, tone: "positive" });
       }
+      if (next.length === POWER_UPS.length) {
+        unlockEgg("detox_master", null, { kind: "confetti", x, y });
+      }
     }
-    setActivePowerUps((prev) =>
-      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+    setActivePowerUps(next);
+  };
+
+  const handleBoardBatteryTap = (e) => {
+    const now = Date.now();
+    const recent = boardBatteryTapTimesRef.current.filter((t) => now - t < 2500);
+    recent.push(now);
+    boardBatteryTapTimesRef.current = recent;
+
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX || rect.left + rect.width / 2;
+    const y = e.clientY || rect.top + rect.height / 2;
+
+    if (recent.length >= 5) {
+      boardBatteryTapTimesRef.current = [];
+      handleTurboBattery(x, y);
+      return;
+    }
+    triggerBurst({ kind: "spark", x, y });
+  };
+
+  const handleTwinClick = (twin, e) => {
+    const rect = e?.currentTarget?.getBoundingClientRect();
+    const x = e?.clientX || (rect ? rect.left + rect.width / 2 : undefined);
+    const y = e?.clientY || (rect ? rect.top + rect.height / 2 : undefined);
+    triggerBurst({ kind: "float", x, y: (y || 300) - 12, text: "+سلام للتوأم", tone: "positive" });
+    unlockEgg(
+      "twin_ping",
+      `توأمك في ${twin.country} ماسك ${twin.platform} دلوقتي زيك بالظبط`,
+      { kind: "spark", x, y }
     );
+  };
+
+  const handleFootnoteTap = () => {
+    const now = Date.now();
+    const recent = footnoteTapTimesRef.current.filter((t) => now - t < 1800);
+    recent.push(now);
+    footnoteTapTimesRef.current = recent;
+    if (recent.length >= 3) {
+      footnoteTapTimesRef.current = [];
+      setVaultOpen(true);
+    }
   };
 
   const pinStartingPoint = () => {
@@ -399,6 +583,10 @@ export default function App() {
       <LandingScreen
         onStartQuiz={() => setStage("questions")}
         onBurst={triggerBurst}
+        supercharged={supercharged}
+        onTurboTrigger={handleTurboBattery}
+        unlockedCount={unlockedEggs.length}
+        onOpenVault={() => setVaultOpen(true)}
         onSkipToBoard={() => {
           setBaseline(null);
           setActivePowerUps([]);
@@ -450,7 +638,11 @@ export default function App() {
     const deltaIsNegative = baseline && !deltaIsPositive && (mhDelta < 0 || riskDelta > 0);
 
     stageView = (
-      <div className="app-shell" data-theme={themeKey}>
+      <div
+        className={`app-shell ${boardShake ? "is-shaking" : ""}`}
+        data-theme={themeKey}
+        data-egg={nokiaMode ? "nokia" : undefined}
+      >
         <header className="topbar">
           <button
             type="button"
@@ -462,6 +654,24 @@ export default function App() {
           </button>
 
           <div className="topbar-actions">
+            {nokiaMode && (
+              <button
+                type="button"
+                className="btn-ghost-sm"
+                onClick={() => setNokiaMode(false)}
+              >
+                اقفل وضع نوكيا
+              </button>
+            )}
+            {unlockedEggs.length > 0 && (
+              <button
+                type="button"
+                className="egg-pill-btn"
+                onClick={() => setVaultOpen(true)}
+              >
+                أسرار {unlockedEggs.length}/5
+              </button>
+            )}
             <button type="button" className="btn-ghost-sm" onClick={() => setStage("questions")}>
               عيد الاختبار
             </button>
@@ -710,7 +920,13 @@ export default function App() {
           <section className="canvas-column">
             <div className={`surface-card hero-stage ${celebratingHero ? "is-celebrating" : ""}`}>
               <div className="hero-left">
-                <BrainBattery score={mhScore} persona={persona} />
+                <BrainBattery
+                  score={mhScore}
+                  persona={persona}
+                  interactive
+                  supercharged={supercharged}
+                  onTap={handleBoardBatteryTap}
+                />
 
                 <div className="archetype-copy">
                   <div className="badge-row">
@@ -783,6 +999,7 @@ export default function App() {
               userPoint={sim?.pca_point || null}
               baselinePoint={baseline?.result?.pca_point || null}
               nearestTwin={sim?.nearest_twin || null}
+              onTwinClick={handleTwinClick}
             />
 
             <div className="insight-split">
@@ -838,7 +1055,7 @@ export default function App() {
             </div>
 
             {cohort.model_stats && (
-              <footer className="model-footnote">
+              <footer className="model-footnote" onClick={handleFootnoteTap}>
                 بيانات 705 طالب من 110 دولة — Ridge للنفسية (R² {cohort.model_stats.ridge_r2})، XGBoost للدرجات (F1 {cohort.model_stats.xgb_f1})، K-Means (silhouette {cohort.model_stats.kmeans_silhouette}).
               </footer>
             )}
@@ -852,6 +1069,19 @@ export default function App() {
     <>
       {stageView}
       <DopamineBurst bursts={bursts} />
+      <EasterEggOverlay
+        toast={eggToast}
+        vaultOpen={vaultOpen}
+        unlockedEggs={unlockedEggs}
+        nokiaMode={nokiaMode}
+        onOpenVault={() => {
+          setEggToast(null);
+          setVaultOpen(true);
+        }}
+        onCloseVault={() => setVaultOpen(false)}
+        onDismissToast={() => setEggToast(null)}
+        onToggleNokia={() => setNokiaMode((prev) => !prev)}
+      />
     </>
   );
 }

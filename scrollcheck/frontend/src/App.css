@@ -1856,6 +1856,279 @@ h2,
   }
 }
 
+/* ==========================================================================
+   Easter Eggs: Nokia 3310 Light LCD Theme, Supercharge, Toast & Vault Modal
+   ========================================================================== */
+.app-shell[data-egg="nokia"] {
+  --bg-canvas: #E2ECCF;
+  --surface: #F3F8E8;
+  --surface-subtle: #D5E4BC;
+  --border: rgba(34, 58, 28, 0.2);
+  --border-hover: rgba(34, 58, 28, 0.45);
+  --ink-primary: #1B2B17;
+  --ink-secondary: #486140;
+  --accent: #2F6F28;
+  --accent-hover: #23571D;
+  --accent-contrast: #FFFFFF;
+  --twin-accent: #1D4ED8;
+  --ring-track: #C5D9A8;
+  --ring-scroll: #2F6F28;
+  --map-bg: #ECF4DD;
+  --map-grid: rgba(34, 58, 28, 0.12);
+  background: radial-gradient(circle at 82% 8%, rgba(74, 150, 62, 0.14), transparent 46%),
+    var(--bg-canvas);
+  color: var(--ink-primary);
+}
+
+.app-shell.is-shaking {
+  animation: screen-wiggle 280ms ease;
+}
+
+@keyframes screen-wiggle {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  50% { transform: translateX(5px); }
+  75% { transform: translateX(-3px); }
+}
+
+.battery-widget.is-supercharged {
+  background: radial-gradient(circle, rgba(245, 158, 11, 0.34) 0%, transparent 74%);
+}
+
+.twin-pill-btn {
+  border: none;
+  font: inherit;
+  cursor: pointer;
+  transition: transform 160ms cubic-bezier(0.34, 1.56, 0.64, 1), filter 160ms ease;
+}
+
+.twin-pill-btn:hover {
+  transform: scale(1.06);
+  filter: brightness(1.06);
+}
+
+.twin-pill-btn:active {
+  transform: scale(0.95);
+}
+
+.egg-pill-btn {
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  background: #FEF3C7;
+  color: #92400E;
+  padding: 4px 11px;
+  border-radius: 999px;
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 150ms cubic-bezier(0.34, 1.56, 0.64, 1), background-color 150ms ease;
+}
+
+.egg-pill-btn:hover {
+  transform: translateY(-1px);
+  background: #FDE68A;
+}
+
+.meta-secret-btn {
+  border: none;
+  background: transparent;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+.egg-toast {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(92vw, 400px);
+  background: #FFFFFF;
+  color: #1F2937;
+  border: 1px solid rgba(245, 158, 11, 0.42);
+  border-radius: 16px;
+  padding: 13px 16px;
+  box-shadow: 0 16px 36px rgba(15, 23, 42, 0.14);
+  z-index: 70;
+  direction: rtl;
+  text-align: right;
+  animation: toast-in 260ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 14px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0) scale(1);
+  }
+}
+
+.egg-toast-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.egg-toast-badge {
+  background: #FEF3C7;
+  color: #92400E;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 0.74rem;
+  font-weight: 700;
+}
+
+.egg-toast-close {
+  border: none;
+  background: transparent;
+  color: #6B7280;
+  font-size: 1.15rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 2px 4px;
+}
+
+.egg-toast-msg {
+  margin: 0 0 8px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  line-height: 1.45;
+}
+
+.egg-toast-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.egg-toast-link {
+  border: none;
+  background: #F96B1C;
+  color: #FFFFFF;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font: inherit;
+  font-size: 0.76rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.egg-vault-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.38);
+  backdrop-filter: blur(3px);
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  z-index: 80;
+  direction: rtl;
+}
+
+.egg-vault-modal {
+  width: min(94vw, 460px);
+  max-height: 86vh;
+  overflow-y: auto;
+  background: #FFFFFF;
+  color: #1F2937;
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  border-radius: 18px;
+  padding: 20px 22px;
+  box-shadow: 0 22px 50px rgba(15, 23, 42, 0.2);
+  animation: tooltip-pop 200ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.egg-vault-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.egg-vault-title {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 800;
+}
+
+.egg-vault-count {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #D97706;
+}
+
+.egg-trivia-box {
+  background: #FFF7ED;
+  border: 1px solid rgba(249, 107, 28, 0.22);
+  color: #7C2D12;
+  padding: 10px 12px;
+  border-radius: 11px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  margin-bottom: 14px;
+}
+
+.egg-vault-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.egg-vault-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.egg-vault-row.is-unlocked {
+  background: #ECFDF5;
+  border-color: rgba(16, 185, 129, 0.28);
+}
+
+.egg-vault-row.is-locked {
+  background: #F9FAFB;
+  color: #6B7280;
+}
+
+.egg-vault-icon {
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+.egg-vault-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.egg-vault-text strong {
+  font-size: 0.88rem;
+}
+
+.egg-vault-text span {
+  font-size: 0.77rem;
+}
+
+.egg-vault-footer {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(15, 23, 42, 0.08);
+  display: flex;
+  justify-content: flex-end;
+}
+
 /* Focus & Motion Accessibility */
 button:focus-visible,
 input:focus-visible,
@@ -1867,6 +2140,7 @@ summary:focus-visible {
 
 @media (prefers-reduced-motion: reduce) {
   .app-shell,
+  .app-shell.is-shaking,
   .surface-card,
   .btn-primary,
   .btn-primary.btn-dopamine::after,
@@ -1899,6 +2173,8 @@ summary:focus-visible {
   .landing-container,
   .hero-stage.is-celebrating,
   .rule-row.just-cleared,
+  .egg-toast,
+  .egg-vault-modal,
   .analyzing-spinner,
   .dopamine-layer {
     transition: none;

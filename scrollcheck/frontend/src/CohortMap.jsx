@@ -36,6 +36,7 @@ export default function CohortMap({
   userPoint,
   baselinePoint,
   nearestTwin,
+  onTwinClick,
 }) {
   const [hovered, setHovered] = useState(null);
   const [filter, setFilter] = useState("all");
@@ -339,9 +340,15 @@ export default function CohortMap({
 
       {nearestTwin && (
         <div className="twin-line">
-          <span key={nearestTwin.id} className="twin-pill">
+          <button
+            type="button"
+            key={nearestTwin.id}
+            className="twin-pill twin-pill-btn"
+            onClick={(e) => onTwinClick?.(nearestTwin, e)}
+            title="اضغط لتبعت سلام لتوأمك"
+          >
             تشابه <span className="tabular-readout">{nearestTwin.similarity_pct}%</span>
-          </span>
+          </button>
           <p>
             <strong>أقرب طالب شبهك:</strong> طالب #{nearestTwin.id} ({nearestTwin.age} سنة،{" "}
             {LEVEL_AR[nearestTwin.academic_level] || nearestTwin.academic_level} من{" "}
