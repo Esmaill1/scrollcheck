@@ -1,5 +1,6 @@
 import { useState } from "react";
 import BrandLogo from "./BrandLogo.jsx";
+import AppIcon from "./AppIcon.jsx";
 
 const PLATFORMS = [
   { id: "TikTok", sub: "فيديوهات بتسحب بعض" },
@@ -62,18 +63,18 @@ export default function QuestionFlow({ initialValues, onExit, onComplete }) {
   const daysPerYear = ((answers.daily_usage_hours * 365) / 24).toFixed(1);
 
   return (
-    <div className="app-shell question-shell" data-theme="burnout">
+    <div className="app-shell question-shell" data-theme="moderate">
       <div className="edge-progress-track" aria-hidden="true">
         <div className="edge-progress-fill" style={{ width: `${progress}%` }} />
       </div>
 
       <header className="question-topbar">
         <button type="button" className="q-brand-btn" onClick={onExit} aria-label="رجوع للرئيسية">
-          <BrandLogo theme="burnout" size="sm" />
+          <BrandLogo size="sm" />
         </button>
 
         <span className="q-counter">
-          {step + 1} / {TOTAL_STEPS}
+          سؤال {step + 1} من {TOTAL_STEPS}
         </span>
 
         <button type="button" className="btn-ghost-sm" onClick={onExit}>
@@ -93,14 +94,17 @@ export default function QuestionFlow({ initialValues, onExit, onComplete }) {
                   <button
                     key={p.id}
                     type="button"
-                    className={`q-tile ${answers.platform === p.id ? "is-selected" : ""}`}
+                    className={`q-tile q-tile-app ${answers.platform === p.id ? "is-selected" : ""}`}
                     onClick={() => {
                       update("platform", p.id);
                       setStep(1);
                     }}
                   >
-                    <strong>{p.id}</strong>
-                    <span>{p.sub}</span>
+                    <AppIcon name={p.id} size={34} />
+                    <div className="q-tile-text">
+                      <strong>{p.id}</strong>
+                      <span>{p.sub}</span>
+                    </div>
                   </button>
                 ))}
               </div>

@@ -3,10 +3,10 @@ import BrandLogo from "./BrandLogo.jsx";
 
 export default function LandingScreen({ onStartQuiz, onSkipToBoard }) {
   return (
-    <div className="app-shell landing-shell" data-theme="burnout">
+    <div className="app-shell landing-shell" data-theme="moderate">
       <div className="landing-container">
         <header className="landing-brand">
-          <BrandLogo theme="burnout" size="lg" />
+          <BrandLogo size="lg" />
         </header>
 
         <main className="landing-hero">

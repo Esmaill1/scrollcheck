@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import AppIcon from "./AppIcon.jsx";
 import BrainBattery from "./BrainBattery.jsx";
 import BrandLogo from "./BrandLogo.jsx";
 import CohortMap from "./CohortMap.jsx";
@@ -315,7 +316,7 @@ export default function App() {
 
   if (stage === "analyzing") {
     return (
-      <div className="app-shell analyzing-shell" data-theme="burnout">
+      <div className="app-shell analyzing-shell" data-theme="moderate">
         <div className="analyzing-box">
           <div className="analyzing-spinner" aria-hidden="true" />
           <h2>بنقارن يومك بـ 705 طالب...</h2>
@@ -521,10 +522,11 @@ export default function App() {
                     <button
                       key={plat}
                       type="button"
-                      className={`choice-pill ${baseForm.platform === plat ? "is-selected" : ""}`}
+                      className={`choice-pill choice-pill-app ${baseForm.platform === plat ? "is-selected" : ""}`}
                       onClick={() => updateBaseField("platform", plat)}
                     >
-                      {plat}
+                      <AppIcon name={plat} size={18} />
+                      <span>{plat}</span>
                     </button>
                   ))}
                 </div>

@@ -1,8 +1,7 @@
-export default function BrandLogo({ theme = "burnout", size = "md" }) {
-  const src = theme === "burnout" ? "/scrollcheck-logo-dark.png" : "/scrollcheck-logo-light.png";
+export default function BrandLogo({ size = "md" }) {
   return (
     <img
-      src={src}
+      src="/scrollcheck-logo-light.png"
       alt="ScrollCheck"
       className={`brand-logo-img brand-logo-${size}`}
     />

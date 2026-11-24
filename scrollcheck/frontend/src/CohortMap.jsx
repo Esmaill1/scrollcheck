@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import AppIcon from "./AppIcon.jsx";
 
 const PERSONA_COLORS = {
   Balanced: "#10B981",
@@ -110,7 +111,8 @@ export default function CohortMap({
               className={`map-filter-btn ${filter === opt.id ? "is-active" : ""}`}
               onClick={() => setFilter(opt.id)}
             >
-              {opt.label}
+              {(opt.id === "TikTok" || opt.id === "Instagram") && <AppIcon name={opt.id} size={14} />}
+              <span>{opt.label}</span>
             </button>
           ))}
         </div>
