@@ -110,6 +110,8 @@ export default function App() {
   });
   const [sim, setSim] = useState(null);
   const [baseline, setBaseline] = useState(null); // { baseForm, activePowerUps, result }
+  const [showIntro, setShowIntro] = useState(true);
+  const [profileSource, setProfileSource] = useState("Sample: 2 AM TikTok spiral");
   const [quizOpen, setQuizOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const [apiError, setApiError] = useState(null);
@@ -187,19 +189,22 @@ export default function App() {
   }, [effectiveForm]);
 
   const updateBaseField = (key, value) => {
+    setProfileSource("Your custom routine");
     setBaseForm((prev) => ({ ...prev, [key]: value }));
   };
 
-  const applyPreset = (presetValues) => {
+  const applyPreset = (preset) => {
     setBaseline(null);
     setActivePowerUps([]);
-    setBaseForm(presetValues);
+    setProfileSource(`Sample: ${preset.label}`);
+    setBaseForm(preset.values);
   };
 
   const togglePowerUp = (id) => {
     if (!baseline && sim) {
       setBaseline({ baseForm: { ...baseForm }, activePowerUps: [...activePowerUps], result: sim });
     }
+    setProfileSource("Your custom routine");
     setActivePowerUps((prev) =>
       prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
     );
@@ -221,6 +226,7 @@ export default function App() {
     if (!baseline) {
       setBaseline({ baseForm: { ...baseForm }, activePowerUps: [...activePowerUps], result: sim });
     }
+    setProfileSource("Recommended detox plan");
     setActivePowerUps([]);
     setBaseForm((prev) => ({
       ...prev,
@@ -232,8 +238,10 @@ export default function App() {
 
   const handleQuizComplete = (answers) => {
     setQuizOpen(false);
+    setShowIntro(false);
     setBaseline(null);
     setActivePowerUps([]);
+    setProfileSource("Your quiz routine");
     setBaseForm((prev) => ({ ...prev, ...answers }));
   };
 
@@ -301,7 +309,7 @@ export default function App() {
                   key={p.id}
                   type="button"
                   className={`preset-btn ${isCurrent ? "is-active" : ""}`}
-                  onClick={() => applyPreset(p.values)}
+                  onClick={() => applyPreset(p)}
                 >
                   {p.label}
                 </button>
@@ -319,6 +327,52 @@ export default function App() {
         <div className="error-banner" role="alert">
           Model service offline ({apiError}). Make sure FastAPI is running on port 8000.
         </div>
+      )}
+
+      {showIntro && (
+        <section className="panel welcome-banner" aria-label="How ScrollCheck works">
+          <div className="welcome-main">
+            <div>
+              <h2 className="welcome-title">
+                Wondering if your scrolling is hurting your sleep or grades?
+              </h2>
+              <p className="welcome-desc">
+                ScrollCheck compares your daily phone and sleep routine against <strong>705 real students</strong> using machine learning to estimate your burnout risk, match your closest data twin, and find the easiest detox fix.
+              </p>
+            </div>
+            <div className="welcome-actions">
+              <button
+                type="button"
+                className="vibe-check-btn"
+                onClick={() => setQuizOpen(true)}
+              >
+                Check my own habits (15 sec)
+              </button>
+              <button
+                type="button"
+                className="ghost-btn"
+                onClick={() => setShowIntro(false)}
+              >
+                Explore sample profile
+              </button>
+            </div>
+          </div>
+
+          <div className="welcome-steps">
+            <div className="welcome-step">
+              <strong>1. Set your routine</strong>
+              <span>Take the 15-sec quiz or adjust the sliders on the left.</span>
+            </div>
+            <div className="welcome-step">
+              <strong>2. Read your snapshot</strong>
+              <span>See your Brain Battery, grade risk, and place among 705 students.</span>
+            </div>
+            <div className="welcome-step">
+              <strong>3. Try a detox</strong>
+              <span>Toggle power-ups or apply the smallest fix to reach Balanced.</span>
+            </div>
+          </div>
+        </section>
       )}
 
       <main className="workspace">
@@ -352,6 +406,9 @@ export default function App() {
                 </button>
               )}
             </div>
+            <p className="panel-subnote">
+              Tap any real-life habit tweak to preview what happens if you try it this week.
+            </p>
             <div className="powerup-grid">
               {POWER_UPS.map((p) => {
                 const isOn = activePowerUps.includes(p.id);
@@ -535,6 +592,7 @@ export default function App() {
 
               <div className="archetype-copy">
                 <div className="badge-row">
+                  <span className="source-chip">{profileSource}</span>
                   <span className={`persona-pill tone-${themeKey}`}>{persona}</span>
                   {baseline && (mhDelta !== 0 || riskDelta !== 0) && (
                     <span className="delta-chip">
@@ -563,6 +621,7 @@ export default function App() {
                         style={{ width: `${Math.min(100, Math.max(6, mhScore * 10))}%` }}
                       />
                     </div>
+                    <span className="meter-hint">Predicted mood &amp; stress score (1–10)</span>
                   </div>
 
                   <div className="meter-block">
@@ -576,6 +635,7 @@ export default function App() {
                         style={{ width: `${Math.max(5, riskPct)}%` }}
                       />
                     </div>
+                    <span className="meter-hint">Likelihood screen habits hurt studies</span>
                   </div>
                 </div>
               </div>
@@ -603,6 +663,9 @@ export default function App() {
           <div className="insight-split">
             <div className="panel insight-panel">
               <h2 className="section-title">Smallest shift that works</h2>
+              <p className="panel-subnote">
+                Calculated by testing smaller daily tweaks until your profile enters the Balanced zone.
+              </p>
               {sim?.minimum_fix ? (
                 <div className="fix-content">
                   <p className="fix-summary">{sim.minimum_fix.summary}</p>
@@ -630,6 +693,9 @@ export default function App() {
 
             <div className="panel insight-panel">
               <h2 className="section-title">Habit traps from the 705-student study</h2>
+              <p className="panel-subnote">
+                Risk patterns discovered in the real student dataset — red means active in your routine.
+              </p>
               <ul className="rule-list">
                 {(sim?.triggered_rules || []).map((rule) => (
                   <li key={rule.id} className={`rule-item ${rule.status === "active" ? "is-active" : "is-cleared"}`}>

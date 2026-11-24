@@ -23,6 +23,7 @@ export default function DayRing({ usageHours, sleepHours, semesterImpact }) {
 
   return (
     <div className="day-ring-widget">
+      <div className="day-ring-title">Where your 24 hours go</div>
       <div className="day-ring-visual">
         <svg viewBox="0 0 120 120" className="day-ring-svg" role="img" aria-label="24-hour daily time split">
           <circle

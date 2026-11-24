@@ -84,9 +84,9 @@ export default function CohortMap({
     <div className="panel cohort-map-panel">
       <div className="cohort-map-header">
         <div>
-          <h2 className="section-title">Live 705-student galaxy</h2>
+          <h2 className="section-title">Where you sit among 705 real students</h2>
           <p className="section-caption">
-            Slice the crowd, hover any student dot, or follow your glowing beacon and data twin.
+            Each dot is one real student from our 705-student survey. Dots on the left are rested and balanced; dots on the right face heavy scrolling and burnout. Hover any dot to inspect them.
           </p>
         </div>
 
@@ -102,6 +102,14 @@ export default function CohortMap({
             </button>
           ))}
         </div>
+      </div>
+
+      <div className="map-legend-inline" aria-label="Map marker legend">
+        <span><i style={{ background: PERSONA_COLORS.Balanced }} />Balanced</span>
+        <span><i style={{ background: PERSONA_COLORS["Moderate Risk"] }} />Moderate risk</span>
+        <span><i style={{ background: PERSONA_COLORS["High Burnout Risk"] }} />High burnout</span>
+        <span><i className="legend-dot-you" />You (live)</span>
+        <span><i className="legend-dot-twin" />Closest twin</span>
       </div>
 
       <div className="svg-frame">
