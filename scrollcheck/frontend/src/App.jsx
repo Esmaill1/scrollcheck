@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import BrainBattery from "./BrainBattery.jsx";
+import BrandLogo from "./BrandLogo.jsx";
 import CohortMap from "./CohortMap.jsx";
 import DayRing from "./DayRing.jsx";
 import LandingScreen from "./LandingScreen.jsx";
@@ -343,12 +344,9 @@ export default function App() {
   return (
     <div className="app-shell" data-theme={themeKey}>
       <header className="topbar">
-        <button type="button" className="brand-home-btn" onClick={() => setStage("landing")}>
-          <div className="brand-badge" aria-hidden="true">
-            <span />
-          </div>
-          <div className="brand-text-left">
-            <h1 className="brand-name">ScrollCheck</h1>
+        <button type="button" className="brand-home-btn" onClick={() => setStage("landing")} aria-label="ScrollCheck home">
+          <div className="brand-lockup">
+            <BrandLogo theme={themeKey} size="md" />
             <p className="brand-subtitle">Your result &amp; interactive detox board</p>
           </div>
         </button>

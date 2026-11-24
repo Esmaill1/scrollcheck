@@ -132,7 +132,6 @@ h2,
 .brand-home-btn {
   display: flex;
   align-items: center;
-  gap: 12px;
   border: none;
   background: transparent;
   padding: 0;
@@ -140,6 +139,31 @@ h2,
   font: inherit;
   cursor: pointer;
   text-align: left;
+}
+
+.brand-lockup {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.brand-logo-img {
+  display: block;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+}
+
+.brand-logo-sm {
+  height: 28px;
+}
+
+.brand-logo-md {
+  height: 36px;
+}
+
+.brand-logo-lg {
+  height: 48px;
 }
 
 /* ==========================================================================

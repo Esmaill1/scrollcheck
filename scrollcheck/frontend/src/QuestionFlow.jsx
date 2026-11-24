@@ -1,4 +1,5 @@
 import { useState } from "react";
+import BrandLogo from "./BrandLogo.jsx";
 
 const PLATFORMS = [
   { id: "TikTok", sub: "Short-form loops" },
@@ -63,11 +64,8 @@ export default function QuestionFlow({ initialValues, onExit, onComplete }) {
   return (
     <div className="app-shell question-shell" data-theme="burnout">
       <div className="question-topbar">
-        <button type="button" className="q-brand-btn" onClick={onExit}>
-          <div className="brand-badge small" aria-hidden="true">
-            <span />
-          </div>
-          <span>ScrollCheck</span>
+        <button type="button" className="q-brand-btn" onClick={onExit} aria-label="Back to ScrollCheck home">
+          <BrandLogo theme="burnout" size="sm" />
         </button>
 
         <span className="q-counter">

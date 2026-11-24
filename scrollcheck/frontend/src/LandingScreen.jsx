@@ -1,14 +1,12 @@
 import BrainBattery from "./BrainBattery.jsx";
+import BrandLogo from "./BrandLogo.jsx";
 
 export default function LandingScreen({ onStartQuiz, onSkipToBoard }) {
   return (
     <div className="app-shell landing-shell" data-theme="burnout">
       <div className="landing-container">
         <header className="landing-brand">
-          <div className="brand-badge" aria-hidden="true">
-            <span />
-          </div>
-          <span className="brand-name">ScrollCheck</span>
+          <BrandLogo theme="burnout" size="lg" />
         </header>
 
         <main className="landing-hero">
