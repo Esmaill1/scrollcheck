@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import BrainBattery from "./BrainBattery.jsx";
 import BrandLogo from "./BrandLogo.jsx";
 import CohortMap from "./CohortMap.jsx";
 import DayRing from "./DayRing.jsx";
@@ -585,52 +586,56 @@ export default function App() {
         {/* RIGHT SLEEK RESULT + COHORT BOARD */}
         <section className="canvas-column">
           <div className="surface-card hero-stage">
-            <div className="archetype-copy">
-              <div className="badge-row">
-                <span className={`status-badge tone-${themeKey}`}>
-                  <i aria-hidden="true" />
-                  {PERSONA_AR[persona] || persona}
-                </span>
-                <span className="source-label">{profileSource}</span>
-                {baseline && (mhDelta !== 0 || riskDelta !== 0) && (
-                  <span className="delta-chip">
-                    عن البداية: {mhDelta >= 0 ? `+${mhDelta}` : mhDelta} نفسية ·{" "}
-                    {riskDelta > 0 ? `+${riskDelta}%` : `${riskDelta}%`} خطر
+            <div className="hero-left">
+              <BrainBattery score={mhScore} persona={persona} />
+
+              <div className="archetype-copy">
+                <div className="badge-row">
+                  <span className={`status-badge tone-${themeKey}`}>
+                    <i aria-hidden="true" />
+                    {PERSONA_AR[persona] || persona}
                   </span>
-                )}
-              </div>
-
-              <h1 className="archetype-title">
-                {sim?.archetype?.title || "بنحسب النتيجة..."}
-              </h1>
-              <p className="archetype-tagline">
-                {sim?.archetype?.tagline || "ثواني وهنطلعلك وضعك."}
-              </p>
-
-              <div className="meter-strip">
-                <div className="meter-block">
-                  <div className="meter-top">
-                    <span>نفسيتك المتوقعة</span>
-                    <strong className="tabular-readout">{mhScore.toFixed(1)} / 10</strong>
-                  </div>
-                  <div className="meter-track">
-                    <div
-                      className="meter-fill meter-fill-mh"
-                      style={{ width: `${Math.min(100, Math.max(6, mhScore * 10))}%` }}
-                    />
-                  </div>
+                  <span className="source-label">{profileSource}</span>
+                  {baseline && (mhDelta !== 0 || riskDelta !== 0) && (
+                    <span className="delta-chip">
+                      عن البداية: {mhDelta >= 0 ? `+${mhDelta}` : mhDelta} نفسية ·{" "}
+                      {riskDelta > 0 ? `+${riskDelta}%` : `${riskDelta}%`} خطر
+                    </span>
+                  )}
                 </div>
 
-                <div className="meter-block">
-                  <div className="meter-top">
-                    <span>احتمال الدرجات تتأثر</span>
-                    <strong className="tabular-readout">{riskPct}%</strong>
+                <h1 className="archetype-title">
+                  {sim?.archetype?.title || "بنحسب النتيجة..."}
+                </h1>
+                <p className="archetype-tagline">
+                  {sim?.archetype?.tagline || "ثواني وهنطلعلك وضعك."}
+                </p>
+
+                <div className="meter-strip">
+                  <div className="meter-block">
+                    <div className="meter-top">
+                      <span>نفسيتك المتوقعة</span>
+                      <strong className="tabular-readout">{mhScore.toFixed(1)} / 10</strong>
+                    </div>
+                    <div className="meter-track">
+                      <div
+                        className="meter-fill meter-fill-mh"
+                        style={{ width: `${Math.min(100, Math.max(6, mhScore * 10))}%` }}
+                      />
+                    </div>
                   </div>
-                  <div className="meter-track">
-                    <div
-                      className={`meter-fill ${riskPct >= 50 ? "meter-fill-danger" : "meter-fill-safe"}`}
-                      style={{ width: `${Math.max(5, riskPct)}%` }}
-                    />
+
+                  <div className="meter-block">
+                    <div className="meter-top">
+                      <span>احتمال الدرجات تتأثر</span>
+                      <strong className="tabular-readout">{riskPct}%</strong>
+                    </div>
+                    <div className="meter-track">
+                      <div
+                        className={`meter-fill ${riskPct >= 50 ? "meter-fill-danger" : "meter-fill-safe"}`}
+                        style={{ width: `${Math.max(5, riskPct)}%` }}
+                      />
+                    </div>
                   </div>
                 </div>
               </div>

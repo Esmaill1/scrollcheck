@@ -1,3 +1,4 @@
+import BrainBattery from "./BrainBattery.jsx";
 import BrandLogo from "./BrandLogo.jsx";
 
 export default function LandingScreen({ onStartQuiz, onSkipToBoard }) {
@@ -9,6 +10,10 @@ export default function LandingScreen({ onStartQuiz, onSkipToBoard }) {
         </header>
 
         <main className="landing-hero">
+          <div className="landing-mascot">
+            <BrainBattery score={5.2} persona="Moderate Risk" />
+          </div>
+
           <h1 className="landing-title">
             الموبايل ساحب يومك ولا لسه ماسك نفسك؟
           </h1>

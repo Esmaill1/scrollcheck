@@ -335,10 +335,11 @@ export default function CohortMap({
 
       {nearestTwin && (
         <div className="twin-line">
-          <span className="twin-dot" aria-hidden="true" />
+          <span className="twin-pill">
+            تشابه <span className="tabular-readout">{nearestTwin.similarity_pct}%</span>
+          </span>
           <p>
-            <strong>أقرب طالب شبهك ({nearestTwin.similarity_pct}% تشابه):</strong> طالب #
-            {nearestTwin.id} ({nearestTwin.age} سنة،{" "}
+            <strong>أقرب طالب شبهك:</strong> طالب #{nearestTwin.id} ({nearestTwin.age} سنة،{" "}
             {LEVEL_AR[nearestTwin.academic_level] || nearestTwin.academic_level} من{" "}
             {nearestTwin.country}) — {nearestTwin.platform} {nearestTwin.usage_hours} س، نوم{" "}
             {nearestTwin.sleep_hours} س، درجاته اتأثرت:{" "}
