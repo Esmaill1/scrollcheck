@@ -1,10 +1,20 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "installCommand": "npm --prefix scrollcheck/frontend install",
-  "buildCommand": "npm --prefix scrollcheck/frontend run build",
-  "outputDirectory": "scrollcheck/frontend/dist",
+  "services": {
+    "frontend": {
+      "root": "scrollcheck/frontend",
+      "framework": "vite",
+      "rewrites": [
+        { "source": "/(.*)", "destination": "/index.html" }
+      ]
+    },
+    "backend": {
+      "root": "scrollcheck/backend",
+      "entrypoint": "main:app"
+    }
+  },
   "rewrites": [
-    { "source": "/api/(.*)", "destination": "/api/index.py" },
-    { "source": "/(.*)", "destination": "/index.html" }
+    { "source": "/api/(.*)", "destination": { "service": "backend" } },
+    { "source": "/(.*)", "destination": { "service": "frontend" } }
   ]
 }

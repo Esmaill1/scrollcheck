@@ -1,5 +1,7 @@
 # ScrollCheck — Student Digital Well-Being & Burnout Risk Analyzer
 
+**Live App (Vercel):** https://scrollcheck-kappa.vercel.app
+
 Interactive **What-If Digital Detox & Burnout Simulator** plus end-to-end machine learning notebook built on survey data from **705 students**.
 
 ## What Is Included
@@ -13,7 +15,7 @@ Interactive **What-If Digital Detox & Burnout Simulator** plus end-to-end machin
 ```bash
 # 1. Start FastAPI backend
 cd scrollcheck/backend
-pip install -r ../../requirements.txt
+pip install -r requirements.txt
 uvicorn main:app --host 127.0.0.1 --port 8000
 
 # 2. Start React/Vite frontend (in another terminal)
