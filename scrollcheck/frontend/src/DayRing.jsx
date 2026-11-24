@@ -4,7 +4,7 @@ export default function DayRing({ usageHours, sleepHours, semesterImpact }) {
   const sleepFrac = Math.min(0.65, Math.max(0.1, sleepHours / total));
   const lifeFrac = Math.max(0.04, 1 - scrollFrac - sleepFrac);
 
-  const radius = 44;
+  const radius = 46;
   const circ = 2 * Math.PI * radius;
 
   const scrollLen = scrollFrac * circ;
@@ -23,7 +23,6 @@ export default function DayRing({ usageHours, sleepHours, semesterImpact }) {
 
   return (
     <div className="day-ring-widget">
-      <div className="day-ring-title">الـ 24 ساعة بتوعك رايحين فين</div>
       <div className="day-ring-visual">
         <svg viewBox="0 0 120 120" className="day-ring-svg" role="img" aria-label="تقسيمة يومك الـ 24 ساعة">
           <circle
@@ -32,7 +31,7 @@ export default function DayRing({ usageHours, sleepHours, semesterImpact }) {
             r={radius}
             fill="none"
             stroke="var(--ring-track)"
-            strokeWidth="13"
+            strokeWidth="8.5"
           />
           <circle
             cx="60"
@@ -40,7 +39,7 @@ export default function DayRing({ usageHours, sleepHours, semesterImpact }) {
             r={radius}
             fill="none"
             stroke="var(--ring-life)"
-            strokeWidth="13"
+            strokeWidth="8.5"
             strokeDasharray={`${lifeLen} ${circ}`}
             strokeDashoffset={-(scrollLen + sleepLen)}
             transform="rotate(-90 60 60)"
@@ -52,7 +51,7 @@ export default function DayRing({ usageHours, sleepHours, semesterImpact }) {
             r={radius}
             fill="none"
             stroke="var(--ring-sleep)"
-            strokeWidth="13"
+            strokeWidth="8.5"
             strokeDasharray={`${sleepLen} ${circ}`}
             strokeDashoffset={-scrollLen}
             transform="rotate(-90 60 60)"
@@ -64,7 +63,7 @@ export default function DayRing({ usageHours, sleepHours, semesterImpact }) {
             r={radius}
             fill="none"
             stroke="var(--ring-scroll)"
-            strokeWidth="13"
+            strokeWidth="8.5"
             strokeDasharray={`${scrollLen} ${circ}`}
             strokeDashoffset="0"
             transform="rotate(-90 60 60)"
@@ -72,9 +71,9 @@ export default function DayRing({ usageHours, sleepHours, semesterImpact }) {
           />
           <text
             x="60"
-            y="55"
+            y="56"
             textAnchor="middle"
-            fontSize="14.5"
+            fontSize="15"
             fontWeight="800"
             fill="var(--ink-primary)"
             fontFamily="Cairo, sans-serif"
@@ -85,7 +84,7 @@ export default function DayRing({ usageHours, sleepHours, semesterImpact }) {
             x="60"
             y="71"
             textAnchor="middle"
-            fontSize="9"
+            fontSize="8.8"
             fontWeight="600"
             fill="var(--ink-secondary)"
             fontFamily="IBM Plex Sans Arabic, sans-serif"
@@ -95,23 +94,15 @@ export default function DayRing({ usageHours, sleepHours, semesterImpact }) {
         </svg>
       </div>
 
-      <div className="day-ring-facts">
-        <div className="ring-legend-row">
-          <span><i style={{ background: "var(--ring-scroll)" }} />سكرول {usageHours.toFixed(1)} س</span>
-          <span><i style={{ background: "var(--ring-sleep)" }} />نوم {sleepHours.toFixed(1)} س</span>
-          <span><i style={{ background: "var(--ring-life)" }} />باقي اليوم {Math.max(0, 24 - usageHours - sleepHours).toFixed(1)} س</span>
-        </div>
-        <div className="semester-pills">
-          <div className="sem-stat">
-            <strong className="tabular-readout">{semScroll} ساعة</strong>
-            <span>سكرول في الترم</span>
-          </div>
-          <div className="sem-stat">
-            <strong className="tabular-readout">{semDebt} ساعة</strong>
-            <span>نقص نوم في الترم</span>
-          </div>
-        </div>
+      <div className="ring-legend-row">
+        <span><i style={{ background: "var(--ring-scroll)" }} />سكرول {usageHours.toFixed(1)} س</span>
+        <span><i style={{ background: "var(--ring-sleep)" }} />نوم {sleepHours.toFixed(1)} س</span>
+        <span><i style={{ background: "var(--ring-life)" }} />باقي اليوم {Math.max(0, 24 - usageHours - sleepHours).toFixed(1)} س</span>
       </div>
+
+      <p className="ring-semester-line">
+        {semScroll} س سكرول · {semDebt} س نقص نوم في الترم
+      </p>
     </div>
   );
 }

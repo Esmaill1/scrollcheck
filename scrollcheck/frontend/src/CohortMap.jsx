@@ -3,11 +3,11 @@ import { useMemo, useState } from "react";
 const PERSONA_COLORS = {
   Balanced: "#10B981",
   "Moderate Risk": "#F59E0B",
-  "High Burnout Risk": "#FF5C7A",
+  "High Burnout Risk": "#F43F5E",
 };
 
 const PERSONA_AR = {
-  Balanced: "متوازن ورايق",
+  Balanced: "متوازن",
   "Moderate Risk": "ضغط متوسط",
   "High Burnout Risk": "إرهاق عالي",
 };
@@ -19,15 +19,15 @@ const LEVEL_AR = {
 };
 
 const FILTER_OPTIONS = [
-  { id: "all", label: "كل الـ 705" },
+  { id: "all", label: "الكل" },
   { id: "TikTok", label: "TikTok" },
   { id: "Instagram", label: "Instagram" },
-  { id: "Undergrad", label: "طلبة جامعة" },
+  { id: "Undergrad", label: "جامعة" },
 ];
 
 const WIDTH = 760;
-const HEIGHT = 340;
-const PAD = { top: 30, right: 28, bottom: 38, left: 28 };
+const HEIGHT = 320;
+const PAD = { top: 28, right: 26, bottom: 34, left: 26 };
 
 export default function CohortMap({
   students,
@@ -93,12 +93,12 @@ export default function CohortMap({
   const originPx = toPx(0, 0);
 
   return (
-    <div className="panel cohort-map-panel">
+    <div className="surface-card cohort-map-panel">
       <div className="cohort-map-header">
         <div>
           <h2 className="section-title">مكانك وسط 705 طالب حقيقي</h2>
           <p className="section-caption">
-            كل نقطة هنا طالب حقيقي من الاستبيان. الشمال يعني نوم مظبوط وتوازن، واليمين يعني سكرول كتير وإرهاق. شاور على أي نقطة تشوف تفاصيلها.
+            الشمال نوم وتوازن، واليمين سكرول وضغط عالي. شاور على أي نقطة لتفاصيلها.
           </p>
         </div>
 
@@ -116,12 +116,12 @@ export default function CohortMap({
         </div>
       </div>
 
-      <div className="map-legend-inline" aria-label="دليل ألوان الخريطة">
+      <div className="map-legend-inline" aria-label="دليل الخريطة">
         <span><i style={{ background: PERSONA_COLORS.Balanced }} />متوازن</span>
-        <span><i style={{ background: PERSONA_COLORS["Moderate Risk"] }} />ضغط متوسط</span>
+        <span><i style={{ background: PERSONA_COLORS["Moderate Risk"] }} />متوسط</span>
         <span><i style={{ background: PERSONA_COLORS["High Burnout Risk"] }} />إرهاق عالي</span>
-        <span><i className="legend-dot-you" />أنت دلوقتي</span>
-        <span><i className="legend-dot-twin" />توأمك في البيانات</span>
+        <span><i className="legend-dot-you" />أنت</span>
+        <span><i className="legend-dot-twin" />توأمك</span>
       </div>
 
       <div className="svg-frame" dir="ltr">
@@ -141,7 +141,7 @@ export default function CohortMap({
               markerHeight="6"
               orient="auto-start-reverse"
             >
-              <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="var(--accent-primary)" />
+              <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="var(--accent)" />
             </marker>
           </defs>
 
@@ -152,7 +152,6 @@ export default function CohortMap({
             y2={originPx.py}
             stroke="var(--map-grid)"
             strokeWidth="1"
-            strokeDasharray="3 5"
           />
           <line
             x1={originPx.px}
@@ -161,7 +160,6 @@ export default function CohortMap({
             y2={HEIGHT - PAD.bottom}
             stroke="var(--map-grid)"
             strokeWidth="1"
-            strokeDasharray="3 5"
           />
 
           {visibleStudents.map((s) => {
@@ -173,11 +171,11 @@ export default function CohortMap({
                 key={s.id}
                 cx={px}
                 cy={py}
-                r={isHovered ? 6.5 : isTwin ? 5.5 : 3.3}
+                r={isHovered ? 6 : isTwin ? 5 : 2.9}
                 fill={PERSONA_COLORS[s.persona] || "#94A3B8"}
-                fillOpacity={isHovered || isTwin ? 0.96 : 0.48}
+                fillOpacity={isHovered || isTwin ? 0.96 : 0.45}
                 stroke={isHovered ? "var(--ink-primary)" : isTwin ? "var(--twin-accent)" : "none"}
-                strokeWidth={isHovered ? 2 : isTwin ? 2.2 : 0}
+                strokeWidth={isHovered ? 1.8 : isTwin ? 2 : 0}
                 className="student-dot"
                 onMouseEnter={() => setHovered(s)}
                 onMouseLeave={() => setHovered(null)}
@@ -195,31 +193,19 @@ export default function CohortMap({
                 ? `متوسط (${c.count})`
                 : `متوازن (${c.count})`;
             return (
-              <g key={c.persona} transform={`translate(${px}, ${py - 18})`} pointerEvents="none">
-                <rect
-                  x="-48"
-                  y="-11"
-                  width="96"
-                  height="20"
-                  rx="10"
-                  fill="var(--surface-elevated)"
-                  fillOpacity="0.92"
-                  stroke={color}
-                  strokeOpacity="0.55"
-                  strokeWidth="1.2"
-                />
-                <text
-                  x="0"
-                  y="3"
-                  textAnchor="middle"
-                  fontSize="10.5"
-                  fontWeight="700"
-                  fill={color}
-                  fontFamily="Cairo, sans-serif"
-                >
-                  {labelText}
-                </text>
-              </g>
+              <text
+                key={c.persona}
+                x={px}
+                y={py - 14}
+                textAnchor="middle"
+                fontSize="11"
+                fontWeight="700"
+                fill={color}
+                fontFamily="Cairo, sans-serif"
+                pointerEvents="none"
+              >
+                {labelText}
+              </text>
             );
           })}
 
@@ -231,17 +217,17 @@ export default function CohortMap({
                 x2={twinPx.px}
                 y2={twinPx.py}
                 stroke="var(--twin-accent)"
-                strokeWidth="1.5"
+                strokeWidth="1.3"
                 strokeDasharray="3 3"
                 strokeOpacity="0.8"
               />
               <circle
                 cx={twinPx.px}
                 cy={twinPx.py}
-                r="8.5"
+                r="7.5"
                 fill="none"
                 stroke="var(--twin-accent)"
-                strokeWidth="2"
+                strokeWidth="1.8"
               />
             </g>
           )}
@@ -253,26 +239,25 @@ export default function CohortMap({
                 y1={basePx.py}
                 x2={userPx.px}
                 y2={userPx.py}
-                stroke="var(--accent-primary)"
-                strokeWidth="2.4"
-                strokeDasharray="5 4"
+                stroke="var(--accent)"
+                strokeWidth="2"
+                strokeDasharray="4 4"
                 markerEnd="url(#trajectory-arrow)"
               />
               <circle
                 cx={basePx.px}
                 cy={basePx.py}
-                r="7"
-                fill="var(--surface-elevated)"
+                r="6"
+                fill="var(--surface)"
                 stroke="var(--ink-secondary)"
-                strokeWidth="2"
-                strokeDasharray="2 2"
+                strokeWidth="1.8"
               />
               <text
                 x={basePx.px}
-                y={basePx.py + 20}
+                y={basePx.py + 18}
                 textAnchor="middle"
-                fontSize="10.5"
-                fontWeight="700"
+                fontSize="10"
+                fontWeight="600"
                 fill="var(--ink-secondary)"
                 fontFamily="Cairo, sans-serif"
               >
@@ -287,26 +272,14 @@ export default function CohortMap({
               style={{ transform: `translate(${userPx.px}px, ${userPx.py}px)` }}
               pointerEvents="none"
             >
-              <circle r="17" fill="var(--accent-primary)" fillOpacity="0.22" className="beacon-halo" />
-              <circle
-                r="8"
-                fill="var(--accent-primary)"
-                stroke="#FFFFFF"
-                strokeWidth="2.5"
-              />
-              <rect
-                x="-21"
-                y="-31"
-                width="42"
-                height="19"
-                rx="9.5"
-                fill="var(--ink-primary)"
-              />
+              <circle r="15" fill="var(--accent)" fillOpacity="0.2" className="beacon-halo" />
+              <circle r="7" fill="var(--accent)" stroke="#FFFFFF" strokeWidth="2.2" />
+              <rect x="-18" y="-28" width="36" height="17" rx="8.5" fill="var(--ink-primary)" />
               <text
                 x="0"
-                y="-18"
+                y="-16.5"
                 textAnchor="middle"
-                fontSize="10.5"
+                fontSize="10"
                 fontWeight="700"
                 fill="var(--bg-canvas)"
                 fontFamily="Cairo, sans-serif"
@@ -318,19 +291,19 @@ export default function CohortMap({
 
           <text
             x={PAD.left}
-            y={HEIGHT - 10}
+            y={HEIGHT - 9}
             textAnchor="start"
-            fontSize="11"
+            fontSize="10.5"
             fill="var(--ink-secondary)"
             fontFamily="IBM Plex Sans Arabic, sans-serif"
           >
-            نوم مظبوط وتوازن
+            نوم وتوازن
           </text>
           <text
             x={WIDTH - PAD.right}
-            y={HEIGHT - 10}
+            y={HEIGHT - 9}
             textAnchor="end"
-            fontSize="11"
+            fontSize="10.5"
             fill="var(--ink-secondary)"
             fontFamily="IBM Plex Sans Arabic, sans-serif"
           >
@@ -344,32 +317,31 @@ export default function CohortMap({
               <strong>
                 طالب #{hovered.id} ({hovered.age} سنة، {hovered.country})
               </strong>
-              <span className="tooltip-tag" style={{ color: PERSONA_COLORS[hovered.persona] }}>
+              <span style={{ color: PERSONA_COLORS[hovered.persona] }}>
                 {PERSONA_AR[hovered.persona] || hovered.persona}
               </span>
             </div>
             <div className="tooltip-grid">
-              <span>موبايل {hovered.usage_hours} س/يوم</span>
-              <span>نوم {hovered.sleep_hours} س/ليل</span>
+              <span>موبايل {hovered.usage_hours} س</span>
+              <span>نوم {hovered.sleep_hours} س</span>
               <span>توتر {hovered.conflicts}/5</span>
               <span>نفسية {hovered.mental_health}/10</span>
               <span>{hovered.platform}</span>
-              <span>أثّر على درجاته: {hovered.academics_affected === "Yes" ? "آه" : "لأ"}</span>
+              <span>تأثير دراسي: {hovered.academics_affected === "Yes" ? "آه" : "لأ"}</span>
             </div>
           </div>
         )}
       </div>
 
       {nearestTwin && (
-        <div className="twin-strip">
-          <div className="twin-badge">
-            تشابه <span className="tabular-readout">{nearestTwin.similarity_pct}%</span>
-          </div>
-          <p className="twin-copy">
-            <strong>أقرب طالب شبهك في البيانات:</strong> طالب #{nearestTwin.id} ({nearestTwin.age} سنة،{" "}
-            {LEVEL_AR[nearestTwin.academic_level] || nearestTwin.academic_level} من {nearestTwin.country}) —
-            بيستخدم <strong>{nearestTwin.platform}</strong> {nearestTwin.usage_hours} س/يوم، بينام{" "}
-            {nearestTwin.sleep_hours} س، نفسيته {nearestTwin.mental_health}/10، ومستواه الدراسي اتأثر:{" "}
+        <div className="twin-line">
+          <span className="twin-dot" aria-hidden="true" />
+          <p>
+            <strong>أقرب طالب شبهك ({nearestTwin.similarity_pct}% تشابه):</strong> طالب #
+            {nearestTwin.id} ({nearestTwin.age} سنة،{" "}
+            {LEVEL_AR[nearestTwin.academic_level] || nearestTwin.academic_level} من{" "}
+            {nearestTwin.country}) — {nearestTwin.platform} {nearestTwin.usage_hours} س، نوم{" "}
+            {nearestTwin.sleep_hours} س، درجاته اتأثرت:{" "}
             <strong>{nearestTwin.academics_affected === "Yes" ? "آه" : "لأ"}</strong>.
           </p>
         </div>

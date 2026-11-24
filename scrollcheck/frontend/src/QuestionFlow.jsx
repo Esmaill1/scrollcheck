@@ -63,35 +63,30 @@ export default function QuestionFlow({ initialValues, onExit, onComplete }) {
 
   return (
     <div className="app-shell question-shell" data-theme="burnout">
-      <div className="question-topbar">
+      <div className="edge-progress-track" aria-hidden="true">
+        <div className="edge-progress-fill" style={{ width: `${progress}%` }} />
+      </div>
+
+      <header className="question-topbar">
         <button type="button" className="q-brand-btn" onClick={onExit} aria-label="رجوع للرئيسية">
           <BrandLogo theme="burnout" size="sm" />
         </button>
 
         <span className="q-counter">
-          سؤال {step + 1} من {TOTAL_STEPS}
+          {step + 1} / {TOTAL_STEPS}
         </span>
 
-        <button type="button" className="ghost-btn" onClick={onExit}>
+        <button type="button" className="btn-ghost-sm" onClick={onExit}>
           خروج
         </button>
-      </div>
-
-      <div className="q-progress-wrap">
-        <div className="q-progress-track">
-          <div className="q-progress-fill" style={{ width: `${progress}%` }} />
-        </div>
-      </div>
+      </header>
 
       <main className="question-stage">
-        <div className="panel q-card" key={step}>
-          {/* Step 1: App */}
+        <div className="q-open-container" key={step}>
           {step === 0 && (
             <div className="q-step-body">
               <h1 className="q-title">أكتر أبلكيشن بياكل وقتك إيه؟</h1>
-              <p className="q-subtitle">
-                اختار الأبلكيشن اللي بتفتحه أكتر حاجة، وهننقل على طول للسؤال اللي بعده.
-              </p>
+              <p className="q-subtitle">اختار الأبلكيشن اللي بتفتحه أكتر حاجة.</p>
 
               <div className="q-tile-grid">
                 {PLATFORMS.map((p) => (
@@ -112,22 +107,21 @@ export default function QuestionFlow({ initialValues, onExit, onComplete }) {
             </div>
           )}
 
-          {/* Step 2: Daily Scrolling */}
           {step === 1 && (
             <div className="q-step-body">
-              <h1 className="q-title">بصراحة.. بتقعد كام ساعة في اليوم على السوشيال؟</h1>
+              <h1 className="q-title">بتقعد كام ساعة في اليوم على السوشيال؟</h1>
               <p className="q-subtitle">حرّك السلايدر أو اختار أقرب رقم ليومك.</p>
 
-              <div className="q-readout-box">
+              <div className="q-readout-inline">
                 <div className="tabular-readout q-big-readout">
-                  {answers.daily_usage_hours.toFixed(1)} <span>ساعة في اليوم</span>
+                  {answers.daily_usage_hours.toFixed(1)} <span>ساعة</span>
                 </div>
-                <div className="q-shock-pill">
-                  يعني بتضيع <strong>{daysPerYear} يوم كامل في السنة</strong> على الشاشة
-                </div>
+                <p className="q-inline-hint">
+                  يعني حوالي {daysPerYear} يوم كامل في السنة على الشاشة
+                </p>
               </div>
 
-              <div className="q-slider-wrap" dir="ltr">
+              <div className="sleek-slider-wrap" dir="ltr">
                 <input
                   type="range"
                   min="1.5"
@@ -137,11 +131,9 @@ export default function QuestionFlow({ initialValues, onExit, onComplete }) {
                   value={answers.daily_usage_hours}
                   onChange={(e) => update("daily_usage_hours", parseFloat(e.target.value))}
                 />
-                <div className="slider-scale">
+                <div className="slider-ends">
                   <span>1.5 س</span>
-                  <span className="threshold-tick" style={{ left: `${((5.5 - 1.5) / (9.0 - 1.5)) * 100}%` }}>
-                    5.5 س حد الخطر
-                  </span>
+                  <span>الحد الآمن ~5.5 س</span>
                   <span>9.0 س</span>
                 </div>
               </div>
@@ -162,36 +154,35 @@ export default function QuestionFlow({ initialValues, onExit, onComplete }) {
               </div>
 
               <div className="q-nav-row">
-                <button type="button" className="ghost-btn q-back" onClick={() => setStep(0)}>
+                <button type="button" className="btn-ghost-sm" onClick={() => setStep(0)}>
                   رجوع
                 </button>
-                <button type="button" className="primary-btn q-next" onClick={() => setStep(2)}>
+                <button type="button" className="btn-primary" onClick={() => setStep(2)}>
                   اللي بعده
                 </button>
               </div>
             </div>
           )}
 
-          {/* Step 3: Nightly Sleep */}
           {step === 2 && (
             <div className="q-step-body">
               <h1 className="q-title">بتنام كام ساعة في أيام الدراسة؟</h1>
               <p className="q-subtitle">النوم هو أكتر حاجة بتحميك من الإرهاق وتشتيت المذاكرة.</p>
 
-              <div className="q-readout-box">
+              <div className="q-readout-inline">
                 <div className="tabular-readout q-big-readout">
-                  {answers.sleep_hours.toFixed(1)} <span>ساعة في الليل</span>
+                  {answers.sleep_hours.toFixed(1)} <span>ساعة</span>
                 </div>
-                <div className={`q-shock-pill ${answers.sleep_hours >= 7.0 ? "is-good" : ""}`}>
+                <p className={`q-inline-hint ${answers.sleep_hours >= 7.0 ? "is-good" : "is-warn"}`}>
                   {answers.sleep_hours < 6.5
                     ? "أقل من 6.5 ساعات بيراكم إرهاق وتشتيت تاني يوم"
                     : answers.sleep_hours < 7.5
                     ? "قريب من المعقول، بس 7.5 ساعات بتفرق في التركيز"
                     : "نوم مظبوط وبيديك طاقة تاني يوم"}
-                </div>
+                </p>
               </div>
 
-              <div className="q-slider-wrap" dir="ltr">
+              <div className="sleek-slider-wrap" dir="ltr">
                 <input
                   type="range"
                   min="4.0"
@@ -201,11 +192,9 @@ export default function QuestionFlow({ initialValues, onExit, onComplete }) {
                   value={answers.sleep_hours}
                   onChange={(e) => update("sleep_hours", parseFloat(e.target.value))}
                 />
-                <div className="slider-scale">
+                <div className="slider-ends">
                   <span>4.0 س</span>
-                  <span className="threshold-tick" style={{ left: `${((6.5 - 4.0) / (9.5 - 4.0)) * 100}%` }}>
-                    6.5 س أقل حاجة
-                  </span>
+                  <span>الموصى به 6.5+ س</span>
                   <span>9.5 س</span>
                 </div>
               </div>
@@ -226,30 +215,27 @@ export default function QuestionFlow({ initialValues, onExit, onComplete }) {
               </div>
 
               <div className="q-nav-row">
-                <button type="button" className="ghost-btn q-back" onClick={() => setStep(1)}>
+                <button type="button" className="btn-ghost-sm" onClick={() => setStep(1)}>
                   رجوع
                 </button>
-                <button type="button" className="primary-btn q-next" onClick={() => setStep(3)}>
+                <button type="button" className="btn-primary" onClick={() => setStep(3)}>
                   اللي بعده
                 </button>
               </div>
             </div>
           )}
 
-          {/* Step 4: Phone Tension */}
           {step === 3 && (
             <div className="q-step-body">
-              <h1 className="q-title">الموبايل بيعملك توتر أو خناقات أو FOMO قد إيه؟</h1>
-              <p className="q-subtitle">
-                التوتر والخناقات بسبب السوشيال ليهم علاقة مباشرة بهبوط الدرجات.
-              </p>
+              <h1 className="q-title">الموبايل بيعملك توتر أو خناقات قد إيه؟</h1>
+              <p className="q-subtitle">التوتر بسبب السوشيال ليه علاقة مباشرة بهبوط الدرجات.</p>
 
               <div className="q-stack-options">
                 {TENSION_OPTIONS.map((opt) => (
                   <button
                     key={opt.value}
                     type="button"
-                    className={`q-tile q-tile-wide ${answers.conflicts === opt.value ? "is-selected" : ""}`}
+                    className={`q-tile ${answers.conflicts === opt.value ? "is-selected" : ""}`}
                     onClick={() => {
                       update("conflicts", opt.value);
                       setStep(4);
@@ -262,20 +248,17 @@ export default function QuestionFlow({ initialValues, onExit, onComplete }) {
               </div>
 
               <div className="q-nav-row">
-                <button type="button" className="ghost-btn q-back" onClick={() => setStep(2)}>
+                <button type="button" className="btn-ghost-sm" onClick={() => setStep(2)}>
                   رجوع
                 </button>
               </div>
             </div>
           )}
 
-          {/* Step 5: Profile & Reveal */}
           {step === 4 && (
             <div className="q-step-body">
               <h1 className="q-title">آخر سؤال.. أنت في مرحلة إيه؟</h1>
-              <p className="q-subtitle">
-                عشان نطلعلك أقرب طالب شبهك بالظبط وسط الـ 705 طالب.
-              </p>
+              <p className="q-subtitle">عشان نطلعلك أقرب طالب شبهك وسط الـ 705 طالب.</p>
 
               <div className="q-stage-grid">
                 {STUDY_STAGES.map((st) => (
@@ -326,10 +309,10 @@ export default function QuestionFlow({ initialValues, onExit, onComplete }) {
               </div>
 
               <div className="q-nav-row">
-                <button type="button" className="ghost-btn q-back" onClick={() => setStep(3)}>
+                <button type="button" className="btn-ghost-sm" onClick={() => setStep(3)}>
                   رجوع
                 </button>
-                <button type="button" className="primary-btn q-next" onClick={() => onComplete(answers)}>
+                <button type="button" className="btn-primary" onClick={() => onComplete(answers)}>
                   وريني النتيجة
                 </button>
               </div>
